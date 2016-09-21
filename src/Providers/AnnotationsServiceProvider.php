@@ -26,7 +26,7 @@ class AnnotationsServiceProvider extends ServiceProvider {
 
         $this->registerManifestScanner();
 
-        $this->app->register(Fideloper\Proxy\TrustedProxyServiceProvider::class),
+        $this->app->register(Fideloper\Proxy\TrustedProxyServiceProvider::class);
     }
 
     /**
