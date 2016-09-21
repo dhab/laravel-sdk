@@ -13,7 +13,7 @@ class AnnotationsServiceProvider extends ServiceProvider {
      * @var array
      */
     protected $scanRoutes = [
-      DreamHack\SDK\Controllers\ManifestController::class,
+      DreamHack\SDK\Http\Controllers\ManifestController::class,
     ];
 
     /**
