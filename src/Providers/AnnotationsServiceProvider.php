@@ -8,6 +8,15 @@ use Collective\Annotations\AnnotationsServiceProvider as ServiceProvider;
 class AnnotationsServiceProvider extends ServiceProvider {
 
     /**
+     * The classes to scan for route annotations.
+     *
+     * @var array
+     */
+    protected $scanRoutes = [
+      DreamHack\SDK\Controllers\ManifestController::class,
+    ];
+
+    /**
      * Register the service provider.
      *
      * @return void
@@ -16,6 +25,8 @@ class AnnotationsServiceProvider extends ServiceProvider {
         parent::register();
 
         $this->registerManifestScanner();
+
+        $this->app->register(Fideloper\Proxy\TrustedProxyServiceProvider::class),
     }
 
     /**
