@@ -1,0 +1,27 @@
+{
+    "name": "dreamhack/laravel-sdk",
+    "description": "The SDK for developing DreamHack APIs in Laravel for use in the DHID infrastructure.",
+    "keywords": [],
+    "license": "MIT",
+    "support": {
+        "issues": "https://git.dreamhack.se/api/laravel-sdk/issues",
+        "source": "https://git.dreamhack.se/api/laravel-sdk"
+    },
+    "require": {
+        "ramsey/uuid": "^3.3",
+        "m6web/firewall": "^1.0",
+        "fideloper/proxy": "^3.1",
+        "laravelcollective/annotations": "5.2.*",
+    },
+    "authors": [
+        {
+            "name": "Dennis Holmén",
+            "email": "dh@dreamhack.se"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "DreamHack\\SDK\\": "src/"
+        }
+    }
+}
