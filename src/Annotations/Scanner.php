@@ -11,15 +11,15 @@ class Scanner extends BaseRouteScanner {
 			"prefix" => env('API_PREFIX', 'content'),
 			"endpoints" => [],
 		];
-
-		foreach ($this->getEndpointsInClasses($this->getReader()) as $endpoint) {
+		$endpoints = $this->getEndpointsInClasses($this->getReader());
+		foreach ($endpoints as $endpoint) {
 			if($endpoint->reflection->name == $skipClass) {
 				continue;
 			}
 			foreach($endpoint->getPaths() as $path) {
 				$method = strtoupper($path->verb);
 				$uriParts = explode('/', $path->path);
-
+				
 				$version = array_shift($uriParts);
 				array_shift($uriParts);
 				$url = str_replace("//", "/", "^/".implode($uriParts, '/')."/?$");
@@ -29,21 +29,21 @@ class Scanner extends BaseRouteScanner {
 					"version" => $version,
 					"url" => $url
 				];
-				if(isset($endpoint->skipAuth) && $endpoint->skipAuth) {
+				if($method == 'GET' && isset($endpoint->skipAuth) && $endpoint->skipAuth) {
 					$route['skipAuth'] = true;
 				}
 				if(isset($endpoint->cacheable) && $endpoint->cacheable) {
 					$route['cacheable'] = true;
 				}
 				$manifest['endpoints'][] = $route;
-
+				
 				if($method == 'GET') {
 					$route['method'] = 'HEAD';
 					$manifest['endpoints'][] = $route;
 				}
 			}
 		}
-
+		
 		return $manifest;
 	}
 }

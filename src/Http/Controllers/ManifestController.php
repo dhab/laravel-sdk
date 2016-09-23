@@ -5,7 +5,7 @@ namespace DreamHack\SDK\Http\Controllers;
 
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
-use DreamHack\SDK\AnnotationsServiceProvider;
+use DreamHack\SDK\Providers\AnnotationsServiceProvider;
 
 class ManifestController extends BaseController
 {

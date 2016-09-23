@@ -1,9 +1,11 @@
 <?php
 namespace DreamHack\SDK\Providers;
 
-use DreamHack\SDK\Annotations\ManifestScanner;
-use Collective\Annotations\Routing\Annotations\Scanner as RouteScanner;
 use Collective\Annotations\AnnotationsServiceProvider as ServiceProvider;
+use Collective\Annotations\Routing\Annotations\Scanner as RouteScanner;
+use DreamHack\SDK\Annotations\Scanner as ManifestScanner;
+use DreamHack\SDK\Http\Controllers\ManifestController;
+use Fideloper\Proxy\TrustedProxyServiceProvider;
 
 class AnnotationsServiceProvider extends ServiceProvider {
 
@@ -13,7 +15,7 @@ class AnnotationsServiceProvider extends ServiceProvider {
      * @var array
      */
     protected $scanRoutes = [
-      DreamHack\SDK\Http\Controllers\ManifestController::class,
+      ManifestController::class,
     ];
 
     /**
@@ -26,7 +28,7 @@ class AnnotationsServiceProvider extends ServiceProvider {
 
         $this->registerManifestScanner();
 
-        $this->app->register(Fideloper\Proxy\TrustedProxyServiceProvider::class);
+        $this->app->register(TrustedProxyServiceProvider::class);
     }
 
     /**
@@ -39,17 +41,21 @@ class AnnotationsServiceProvider extends ServiceProvider {
         $this->app->singleton('annotations.manifest.scanner', function ($app) {
             $scanner = new ManifestScanner([]);
 
-            $scanner->addAnnotationNamespace( 'Collective\Annotations\Routing\Annotations\Annotations' );
-            $scanner->addAnnotationNamespace( 'DreamHack\SDK\Annotations' );
+            $scanner->addAnnotationNamespace( 'Collective\Annotations\Routing\Annotations\Annotations', base_path().'/vendor/laravelcollective/annotations/src/Routing/Annotations/Annotations' );
+            $scanner->addAnnotationNamespace( 'DreamHack\SDK\Annotations', __DIR__.'/../Annotations' );
             return $scanner;
         });
     }
 
     public function getManifest($skipClass = false) {
 
+        $this->app->make('annotations.route.scanner');
         $scanner = $this->app->make('annotations.manifest.scanner');
-
-        $scanner->setClassesToScan($this->routeScans());
+        $classes = array_merge(
+          $this->scanRoutes,
+          $this->getClassesFromNamespace($this->getAppNamespace().'Http\\Controllers')
+        );
+        $scanner->setClassesToScan($classes);
         return $scanner->getManifest($skipClass);
     }
 
