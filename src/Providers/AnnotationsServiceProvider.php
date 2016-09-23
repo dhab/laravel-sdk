@@ -18,6 +18,9 @@ class AnnotationsServiceProvider extends ServiceProvider {
       ManifestController::class,
     ];
 
+
+    protected $loadTrustedProxies = true;
+
     /**
      * Register the service provider.
      *
@@ -28,7 +31,8 @@ class AnnotationsServiceProvider extends ServiceProvider {
 
         $this->registerManifestScanner();
 
-        $this->app->register(TrustedProxyServiceProvider::class);
+        if($this->loadTrustedProxies)
+            $this->app->register(TrustedProxyServiceProvider::class);
     }
 
     /**
