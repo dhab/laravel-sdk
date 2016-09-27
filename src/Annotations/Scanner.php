@@ -44,6 +44,11 @@ class Scanner extends BaseRouteScanner {
 			}
 		}
 		
+		// Sort the endpoints by url-length, longest first.
+		usort($manifest['endpoints'], function($a, $b) {
+    		return (strlen($a['url']) > strlen($b['url'])) ? -1 : 1;
+		});
+
 		return $manifest;
 	}
 }
