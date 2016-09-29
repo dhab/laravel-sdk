@@ -35,6 +35,18 @@ class AnnotationsServiceProvider extends ServiceProvider {
             $this->app->register(TrustedProxyServiceProvider::class);
     }
 
+
+    /**
+     * Add annotation classes to the route scanner.
+     *
+     * @param RouteScanner $scanner
+     */
+    public function addRoutingAnnotations(RouteScanner $scanner)
+    {
+        parent::addRoutingAnnotations($scanner);
+        $scanner->addAnnotationNamespace( 'DreamHack\SDK\Annotations', __DIR__.'/../Annotations' );
+    }
+
     /**
      * Register the scanner.
      *
@@ -51,8 +63,7 @@ class AnnotationsServiceProvider extends ServiceProvider {
         });
     }
 
-    public function getManifest($skipClass = false) {
-
+    private function getScanner() {
         $this->app->make('annotations.route.scanner');
         $scanner = $this->app->make('annotations.manifest.scanner');
         $classes = array_merge(
@@ -60,7 +71,15 @@ class AnnotationsServiceProvider extends ServiceProvider {
           $this->getClassesFromNamespace($this->getAppNamespace().'Http\\Controllers')
         );
         $scanner->setClassesToScan($classes);
-        return $scanner->getManifest($skipClass);
+        return $scanner;
+    }
+
+    public function getManifest($skipClass = false) {
+        return $this->getScanner()->getManifest($skipClass);
+    }
+
+    public function getRAMLManifest($skipClass = false) {
+        return $this->getScanner()->getRAMLManifest($skipClass);
     }
 
 }
