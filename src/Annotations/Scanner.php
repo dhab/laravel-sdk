@@ -29,10 +29,10 @@ class Scanner extends BaseRouteScanner {
 					"version" => $version,
 					"url" => $url
 				];
-				if($method == 'GET' && isset($endpoint->skipAuth) && $endpoint->skipAuth) {
+				if(isset($endpoint->skipAuth) && $endpoint->skipAuth) {
 					$route['skipAuth'] = true;
 				}
-				if(isset($endpoint->cacheable) && $endpoint->cacheable) {
+				if($method == 'GET' && isset($endpoint->cacheable) && $endpoint->cacheable) {
 					$route['cacheable'] = true;
 				}
 				$manifest['endpoints'][] = $route;

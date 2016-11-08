@@ -1,5 +1,5 @@
 <?php
-namespace App\Providers\Annotations\Annotations;
+namespace DreamHack\SDK\Annotations;
 
 use Collective\Annotations\Routing\Annotations\Annotations\Annotation;
 use Collective\Annotations\Routing\Annotations\MethodEndpoint;

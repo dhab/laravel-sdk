@@ -56,9 +56,8 @@ class AnnotationsServiceProvider extends ServiceProvider {
     {
         $this->app->singleton('annotations.manifest.scanner', function ($app) {
             $scanner = new ManifestScanner([]);
-
+            $this->addRoutingAnnotations($scanner);
             $scanner->addAnnotationNamespace( 'Collective\Annotations\Routing\Annotations\Annotations', base_path().'/vendor/laravelcollective/annotations/src/Routing/Annotations/Annotations' );
-            $scanner->addAnnotationNamespace( 'DreamHack\SDK\Annotations', __DIR__.'/../Annotations' );
             return $scanner;
         });
     }
