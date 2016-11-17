@@ -28,11 +28,11 @@ class ManifestController extends BaseController
 
     /**
      * Display a listing of the resource.
-     * @Get("manifest.raml", as="manifest.raml", middleware="web")
      * @return \Illuminate\Http\Response
      */
     public function raml()
     {
+        // * @Get("manifest.raml", as="manifest.raml", middleware="web")
         return response()->json($this->provider->getRAMLManifest(static::class));
     }
 
