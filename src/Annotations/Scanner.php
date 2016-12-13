@@ -1,6 +1,7 @@
 <?php
 
 namespace DreamHack\SDK\Annotations;
+use App;
 use Cache;
 use \Collective\Annotations\Routing\Annotations\Scanner as BaseRouteScanner;
 
@@ -55,7 +56,8 @@ class Scanner extends BaseRouteScanner {
 			usort($manifest['endpoints'], function($a, $b) {
 	    		return (strlen($a['url']) > strlen($b['url'])) ? -1 : 1;
 			});
-			Cache::put($this->cache_key, $manifest, 5);
+			if(!App::environment('local'))
+				Cache::put($this->cache_key, $manifest, 5);
 		}
 		return $manifest;
 	}
