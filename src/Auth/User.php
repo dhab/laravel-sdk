@@ -7,9 +7,9 @@ use \Illuminate\Http\Request;
 
 class User {
 	private $logged_in = false;
-	private $id;
-	private $name;
-	private $email;
+	private $id = '';
+	private $name = '';
+	private $email = '';
 	public function getId() {
 		return $this->id;
 	}
@@ -27,7 +27,7 @@ class User {
 			$this->name = $user['name'];
 			$this->email = $user['email'];
 		} else {
-			throw new UnauthorizedException;
+			// throw new UnauthorizedException;
 		}
 	}
 }
