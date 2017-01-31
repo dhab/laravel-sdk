@@ -11,15 +11,9 @@
         "ramsey/uuid": "^3.3",
         "m6web/firewall": "^1.0",
         "fideloper/proxy": "^3.1",
-        "laravelcollective/annotations": "^5.4.0@dev",
+        "laravelcollective/annotations": "^5.4.0",
         "guzzlehttp/guzzle": "^6.2"
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/deriel/annotations.git"
-        }
-    ],
     "authors": [
         {
             "name": "Dennis Holmén",
