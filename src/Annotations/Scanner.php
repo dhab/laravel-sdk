@@ -9,7 +9,7 @@ class Scanner extends BaseRouteScanner {
 	private $cache_key = "manifest";
 	public function getManifest($skipClass = false) {
 		$manifest = false;
-		if(Cache::has($this->cache_key)) {
+		if(!App::environment('local', 'staging') && Cache::has($this->cache_key)) {
 			$manifest = Cache::get($this->cache_key);
 			// $manifest = json_decode($manifest);
 		}
@@ -27,7 +27,9 @@ class Scanner extends BaseRouteScanner {
 				foreach($endpoint->getPaths() as $path) {
 					$method = strtoupper($path->verb);
 					$uriParts = explode('/', $path->path);
-					
+					if(!isset($path->version)) {
+						continue;
+					}
 					$version = array_shift($uriParts);
 					array_shift($uriParts);
 					$url = str_replace("//", "/", "^/".implode($uriParts, '/')."/?$");
@@ -56,7 +58,7 @@ class Scanner extends BaseRouteScanner {
 			usort($manifest['endpoints'], function($a, $b) {
 	    		return (strlen($a['url']) > strlen($b['url'])) ? -1 : 1;
 			});
-			if(!App::environment('local'))
+			if(!App::environment('local', 'staging'))
 				Cache::put($this->cache_key, $manifest, 5);
 		}
 		return $manifest;
