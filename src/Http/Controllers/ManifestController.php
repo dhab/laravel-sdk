@@ -2,19 +2,12 @@
 
 namespace DreamHack\SDK\Http\Controllers;
 
-
+use Manifest;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
-use DreamHack\SDK\Providers\AnnotationsServiceProvider;
 
 class ManifestController extends BaseController
 {
-	private $provider;
-
-
-	public function __construct(AnnotationsServiceProvider $provider) {
-		$this->provider = $provider;
-	}
 
     /**
      * Display a listing of the resource.
@@ -23,7 +16,7 @@ class ManifestController extends BaseController
      */
     public function manifest()
     {
-        return response()->json($this->provider->getManifest(static::class));
+        return response()->json(Manifest::getManifest(static::class));
     }
 
     /**
@@ -33,7 +26,7 @@ class ManifestController extends BaseController
     public function raml()
     {
         // * @Get("manifest.raml", as="manifest.raml", middleware="web")
-        return response()->json($this->provider->getRAMLManifest(static::class));
+        return response()->json(Manifest::getRAMLManifest(static::class));
     }
 
 }
