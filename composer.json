@@ -12,7 +12,8 @@
         "m6web/firewall": "^1.0",
         "fideloper/proxy": "^3.1",
         "laravelcollective/annotations": "^5.4.0",
-        "guzzlehttp/guzzle": "^6.2"
+        "guzzlehttp/guzzle": "^6.2",
+		"symfony/yaml": "^3.2.8",
     },
     "authors": [
         {
