@@ -21,8 +21,6 @@ class DHIDServiceProvider extends ServiceProvider
      * Register any application services.
      */
     public function register() {
-        $client = $this->app->make(DHID::class);
-        $this->app->instance(DHID::class, $client);
         $this->app->singleton(DHID::class, function ($app) {
             $config = [
                 'base_uri' => env('API_BASE_URL', 'https://api.dreamhack.com')
