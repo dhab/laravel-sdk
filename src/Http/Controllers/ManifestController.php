@@ -5,28 +5,36 @@ namespace DreamHack\SDK\Http\Controllers;
 use Manifest;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
+use DreamHack\SDK\Http\Responses;
 
 class ManifestController extends BaseController
 {
 
     /**
      * Display a listing of the resource.
+     * @SkipAuth
      * @Get("manifest", as="manifest", middleware="web")
-     * @return \Illuminate\Http\Response
+     * @return \DreamHack\SDK\Http\Responses\Manifest
      */
     public function manifest()
     {
-        return response()->json(Manifest::getManifest(static::class));
+        return new Responses\Manifest(Manifest::getManifest(static::class));
     }
 
     /**
-     * Display a listing of the resource.
-     * @return \Illuminate\Http\Response
+     * Display generated API documentation in RAML 1.0 format.a
+     * @SkipAuth
+     * @Get("raml", as="raml", middleware="web")
+     * @return \DreamHack\SDK\Http\Responses\Raml
      */
     public function raml()
     {
-        // * @Get("manifest.raml", as="manifest.raml", middleware="web")
-        return response()->json(Manifest::getRAMLManifest(static::class));
+        $raml = Manifest::getRAMLManifest(static::class);
+
+        if ( isset($_GET['errors']) && $_GET['errors'] )
+            return $raml->errors();
+
+        return new Responses\Raml($raml->toArray());
     }
 
 }
