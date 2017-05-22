@@ -2,8 +2,9 @@
 
 namespace DreamHack\SDK\Services;
 use DreamHack\SDK\Facades\Guzzle;
+use GuzzleHttp\Client;
 use Log;
-class DHID {
+class DHID extends Client{
 
     private $updates = [];
 
