@@ -281,8 +281,8 @@ class Raml {
 
                     $type['example']['created_at'] = $dates[0];
                     $type['example']['updated_at'] = $dates[1];
-                    if ( isset($type['properties']['deleted_at']) ) 
-                        $type['example']['deleted_at'] = Fake::randomElement([$dates[2], null]);
+                    //if ( isset($type['properties']['deleted_at']) ) 
+                        //$type['example']['deleted_at'] = Fake::randomElement([$dates[2], null]);
                 }
             } catch (\Exception $ex) {
             
@@ -338,9 +338,7 @@ class Raml {
 
             if ( isset($example) ) {
                 $type['example'] = implode("\n",$example);
-            }
-
-            if ( is_callable([$instance, 'fake']) ) {
+            } elseif ( is_callable([$instance, 'fake']) ) {
                 $type['example'] = $instance->fake();
             }
 
