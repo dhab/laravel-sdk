@@ -32,7 +32,55 @@ class Raml {
                     'error' => [
                         'type' => 'string',
                         'description' => 'Message describing the problem in relation to the error type in human-readable form'
-                    ]
+                    ],
+                    'file' => [
+                        'type' => 'string',
+                        'description' => 'Filename of the source error',
+                        'required' => false,
+                    ],
+                    'line' => [
+                        'type' => 'number',
+                        'description' => 'The line number in the file of the source error',
+                        'required' => false,
+                    ],
+                    'trace' => [
+                        'type' => 'array',
+                        'items' => 'StackTrace',
+                        'description' => 'Stack trace to the source error',
+                        'required' => false,
+                    ],
+                ]
+            ],
+            'StackTrace' => [
+                'name' => 'StackTrace',
+                'type' => 'object',
+                'description' => 'Describes a step in a stack trace. Each step shows a function/method call.',
+                'properties' => [
+                    'file' => [
+                        'type' => 'string',
+                        'required' => false,
+                    ],
+                    'line' => [
+                        'type' => 'number',
+                        'required' => false,
+                    ],
+                    'function' => [
+                        'type' => 'string',
+                        'required' => false,
+                    ],
+                    'class' => [
+                        'type' => 'string',
+                        'required' => false,
+                    ],
+                    'type' => [
+                        'type' => 'string',
+                        'required' => false,
+                    ],
+                    'args' => [
+                        'type' => 'array',
+                        'items' => 'any',
+                        'required' => false,
+                    ],
                 ]
             ]
         ]

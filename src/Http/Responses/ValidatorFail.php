@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Responses;
+namespace DreamHack\SDK\Http\Responses;
 
-use DreamHack\SDK\Http\Responses\Response;
 use Validator;
 
 /**
