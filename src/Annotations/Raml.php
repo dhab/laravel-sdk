@@ -80,7 +80,7 @@ class Raml {
             }
             if ( !$responses ) { // Enpoint has no documented returns, just skip it
                 foreach($endpoint->paths as $path) {
-                    $this->errors[$path->path] = 'Documentation is missing';
+                    $this->errors[$path->verb . ' ' . $path->path] = 'Documentation is missing';
                 }
                 continue;
             }
@@ -159,6 +159,7 @@ class Raml {
                         break;
                     }
                 }
+                ksort($row);
             }
 
             return $row;
