@@ -311,13 +311,17 @@ class Raml {
         if ( $reflection->isSubclassOf(\Illuminate\Database\Eloquent\Model::class) ) {
             $instance = $reflection->newInstance();
 
-            $attributes = self::getAllColumnsNamesFromTable($instance->getTable());
-            foreach($attributes as $name => $t) {
-                $type['properties'] = $type['properties'] ?? [];
-                $type['properties'][$name] = $this->dbTypeToType($t['type']) + [
-                    'description' => 'Database type is '.DB::connection()->getConfig('driver').'/'.$t['type'],
-                    'required' => !$t['required'],
-                ];
+            try {
+                $attributes = self::getAllColumnsNamesFromTable($instance->getTable());
+                foreach($attributes as $name => $t) {
+                    $type['properties'] = $type['properties'] ?? [];
+                    $type['properties'][$name] = $this->dbTypeToType($t['type']) + [
+                        'description' => 'Database type is '.DB::connection()->getConfig('driver').'/'.$t['type'],
+                        'required' => !$t['required'],
+                    ];
+                }
+            } catch (\Illuminate\Database\QueryException $ex) {
+                $this->errors['db exception '.$class] = 'DB exception: '.$ex->getMessage();
             }
 
             try {
