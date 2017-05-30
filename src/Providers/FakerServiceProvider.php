@@ -2,6 +2,8 @@
 
 namespace DreamHack\SDK\Providers;
 
+use Faker\Generator;
+use Faker\Factory;
 use Illuminate\Support\ServiceProvider;
 
 class FakerServiceProvider extends ServiceProvider
@@ -17,14 +19,14 @@ class FakerServiceProvider extends ServiceProvider
      * Register any application services.
      */
     public function register() {
-		$this->app->singleton(\Faker\Generator::class, function ($app) {
-            return \Faker\Factory::create();
+        $this->app->singleton(Generator::class, function ($app) {
+            return Factory::create();
         });
     }
 
     public function provides() {
         return [
-            \Faker\Generator::class,
+            Generator::class,
         ];
     }
 }
