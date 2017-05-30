@@ -2,13 +2,8 @@
 
 namespace DreamHack\SDK\Http\Responses;
 
-use Validator;
-
 /**
- * Input validation failed, returns the first error 
- *
- * @property string $key Contains the row of the error
- * @property string $error The error message
+ * A flat boolean response indicating status of request.
  **/
 
 class BooleanResponse extends Response {
