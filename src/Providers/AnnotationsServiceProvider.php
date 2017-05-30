@@ -5,7 +5,6 @@ use Collective\Annotations\AnnotationsServiceProvider as ServiceProvider;
 use Collective\Annotations\Routing\Annotations\Scanner as RouteScanner;
 use DreamHack\SDK\Annotations\Scanner as ManifestScanner;
 use DreamHack\SDK\Http\Controllers\ManifestController;
-use Fideloper\Proxy\TrustedProxyServiceProvider;
 
 class AnnotationsServiceProvider extends ServiceProvider {
 
@@ -18,9 +17,13 @@ class AnnotationsServiceProvider extends ServiceProvider {
       ManifestController::class,
     ];
 
-
-    protected $loadTrustedProxies = true;
-
+    protected $servicesToLoad = [  
+        AuthServiceProvider::class,
+        DHIDServiceProvider::class,
+        FakerServiceProvider::class,
+        GuzzleServiceProvider::class,
+        ResponseServiceProvider::class,
+    ];
     /**
      * Register the service provider.
      *
@@ -31,8 +34,9 @@ class AnnotationsServiceProvider extends ServiceProvider {
 
         $this->registerManifestScanner();
 
-        if($this->loadTrustedProxies)
-            $this->app->register(TrustedProxyServiceProvider::class);
+        foreach($this->servicesToLoad as $service) {
+            $this->app->register($service);
+        }
     }
 
 
