@@ -1,8 +1,13 @@
 <?php
 
 namespace DreamHack\SDK\Http\Responses;
+use Illuminate\Http\Response as IlluminateResponse;
 
-class Response extends \Illuminate\Http\Response {
+class Response extends IlluminateResponse {
+    public function __construct($content, $status = 200, $headers = []) {
+    	parent::__construct($content, $status, $headers);
+    	$this->header('Content-Type', 'application/json');
+    }
 
 
 	protected function collectionSubset($collection, $fields) {
