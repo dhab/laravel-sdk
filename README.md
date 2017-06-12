@@ -3,6 +3,7 @@
 ### DHID Socialite service provider
 
 The service provider will do two main things. It will add some database migrations and the following two routes: `/login/dhid` and `/login/dhid/callback`. 
+When a user is logged in thru DHID it will automaticly be added to the `users` table and a reference to the DHID uuid is added.
 
 #### Installation
 
