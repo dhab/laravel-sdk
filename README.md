@@ -1,6 +1,9 @@
 ## DreamHack Laravel SDK
 
-### DHID Socialite provider
+### DHID Socialite service provider
+
+The service provider will do two main things. It will add some database migrations and the following two routes: `/login/dhid` and `/login/dhid/callback`. 
+
 #### Installation
 
 After installing the DreamHack Laravel SDK, in your `config/app.php` configuration file add the following:
@@ -33,5 +36,15 @@ Configuration is normaly saved in the `.env` file. Add the following code in you
     ],  
 ```
 
-Now almost everything is done. The service provider automaticly adds the following two routes: `/login/dhid` and `/login/dhid/callback`. 
+### Database
+
+To run the database migrations added by the service provider run
+
+```bash
+artisan migrate
+```
+
+### Usage
+
+Now almost everything is done. 
 To login a user thu DHID, just send the user to the `/login/dhid` endpoint and the user will be redirected to the DHID login protal and then redirected back to your site when login is finished.
