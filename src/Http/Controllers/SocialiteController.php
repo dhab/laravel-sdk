@@ -44,7 +44,7 @@ class SocialiteController extends Controller
     }
 
     /**
-     * Redirect the user to the GitHub authentication page.
+     * Redirect the user to the DHID authentication page.
      *
      * @return Response
      */
@@ -54,14 +54,16 @@ class SocialiteController extends Controller
     }
 
     /**
-     * Obtain the user information from GitHub.
+     * Obtain the user information from DHID.
      *
      * @return Response
      */
     public function handleProviderCallback()
     {
 		if (isset($_GET['error'])) {
-			return response()->view('auth.error', $_GET, 400);
+            return view('DHID::login-error', [
+                'error' => $_GET['error']
+            ]);
 		}
 
         try {
@@ -73,6 +75,10 @@ class SocialiteController extends Controller
         } catch (InvalidStateException $ex) {
             // User returned with an old state.. do a new auth
             return Socialite::driver('dhid')->redirect();
+        } catch (\Exception $ex) {
+            return view('DHID::login-error', [
+                'ex' => $ex
+            ]);
         }
     }
 

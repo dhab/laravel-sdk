@@ -20,6 +20,19 @@ class SocialiteServiceProvider extends ServiceProvider
         // Register routes 
         $this->loadRoutesFrom(__DIR__.'/../../routes/socialite.php');
 
+        // Register views
+        $this->loadViewsFrom(__DIR__.'/../../views/', 'DHID');
+        $this->publishes([
+            __DIR__.'/../../views/' => resource_path('views/vendor/dhid'),
+        ]);
+
+        // Make sure socialite is registerd
+        $this->app->register(\Laravel\Socialite\SocialiteServiceProvider::class);
+
+        // And add the Socialite alias
+        $loader = \Illuminate\Foundation\AliasLoader::getInstance();
+        $loader->alias('Socialite', \Laravel\Socialite\Facades\Socialite::class);
+
         // Register our DHID SocialiteProvider
         $socialite = $this->app->make(\Laravel\Socialite\Contracts\Factory::class);
         $socialite->extend(
