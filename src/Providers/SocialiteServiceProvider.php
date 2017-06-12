@@ -1,0 +1,43 @@
+<?php
+
+namespace DreamHack\SDK\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use Laravel\Socialite\Contracts\Factory;
+
+class SocialiteServiceProvider extends ServiceProvider
+{
+    /**
+     * Bootstrap any application services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        // Register database migrations
+        $this->loadMigrationsFrom(__DIR__.'/../../migrations/socialite');
+
+        // Register routes 
+        $this->loadRoutesFrom(__DIR__.'/../../routes/socialite.php');
+
+        // Register our DHID SocialiteProvider
+        $socialite = $this->app->make(\Laravel\Socialite\Contracts\Factory::class);
+        $socialite->extend(
+            'dhid',
+            function ($app) use ($socialite) {
+                $config = $app['config']['services.dhid'];
+                return $socialite->buildProvider(SocialiteProvider::class, $config);
+            }
+        );
+    }
+
+    /**
+     * Register any application services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        //
+    }
+}
