@@ -60,16 +60,16 @@ class SocialiteController extends Controller
      */
     public function handleProviderCallback()
     {
-		if (isset($_GET['error'])) {
+        if (isset($_GET['error'])) {
             return view('DHID::login-error', [
                 'error' => $_GET['error']
             ]);
-		}
+        }
 
         try {
-    		$_SESSION['dhid'] = Socialite::driver('dhid')->user();
-	    	$authUser = $this->findOrCreateUser($_SESSION['dhid']);
-    		Auth::login($authUser, true);
+            $_SESSION['dhid'] = Socialite::driver('dhid')->user();
+            $authUser = $this->findOrCreateUser($_SESSION['dhid']);
+            Auth::login($authUser, true);
 
             return redirect($this->redirectTo);
         } catch (InvalidStateException $ex) {
@@ -90,11 +90,13 @@ class SocialiteController extends Controller
      */
     private function findOrCreateUser($dhidUser)
     {
-		if (!$user = User::where('dhid', $dhidUser->id)->first()) // Find based on UUID
-            if (!$user = User::where('email', $dhidUser->email)->first()) // Find based on email
+        if (!$user = User::where('dhid', $dhidUser->id)->first()) { // Find based on UUID
+            if (!$user = User::where('email', $dhidUser->email)->first()) { // Find based on email
                 $user = New User([ // Create a new user
                     'password' => '',
                 ]);
+            }
+        }
 
         // Update attributes
         $user->name = 
