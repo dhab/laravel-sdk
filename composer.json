@@ -4,20 +4,25 @@
     "keywords": [],
     "license": "MIT",
     "support": {
-        "issues": "https://git.dreamhack.se/api/laravel-sdk/issues",
-        "source": "https://git.dreamhack.se/api/laravel-sdk"
+        "issues": "https://git.dreamhack.se/dhid/laravel-sdk/issues",
+        "source": "https://git.dreamhack.se/dhid/laravel-sdk"
     },
     "require": {
         "ramsey/uuid": "^3.3",
         "laravelcollective/annotations": "^5.4.0",
         "guzzlehttp/guzzle": "^6.2",
         "symfony/yaml": "^3.2.8",
-        "fzaninotto/faker": "^1.6"
+        "fzaninotto/faker": "^1.6",
+        "laravel/socialite": "^3.0"
     },
     "authors": [
         {
             "name": "Dennis Holmén",
             "email": "dh@dreamhack.se"
+        },
+        {
+            "name": "Jonathan Grimmtjärn",
+            "email": "stamp@dreamhack.se"
         }
     ],
     "autoload": {
