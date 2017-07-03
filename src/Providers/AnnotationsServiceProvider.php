@@ -62,22 +62,19 @@ class AnnotationsServiceProvider extends ServiceProvider {
             $scanner = new ManifestScanner([]);
             $this->addRoutingAnnotations($scanner);
             $scanner->addAnnotationNamespace( 'Collective\Annotations\Routing\Annotations\Annotations', base_path().'/vendor/laravelcollective/annotations/src/Routing/Annotations/Annotations' );
+            $scanner->setClassesToScan($this->routeScans());
             return $scanner;
         });
     }
 
-    private function getScanner() {
+    protected function getScanner() {
         $this->app->make('annotations.route.scanner');
         $scanner = $this->app->make('annotations.manifest.scanner');
-        $classes = array_merge(
-          $this->scanRoutes,
-          $this->getClassesFromNamespace($this->getAppNamespace().'Http\\Controllers')
-        );
-        $scanner->setClassesToScan($classes);
         return $scanner;
     }
 
     public function getManifest($skipClass = false) {
+        dd($this->getScanner());
         return $this->getScanner()->getManifest($skipClass);
     }
 

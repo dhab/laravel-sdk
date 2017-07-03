@@ -3,6 +3,7 @@
 namespace DreamHack\SDK\Annotations;
 use App;
 use Cache;
+use URL;
 use \Collective\Annotations\Routing\Annotations\Scanner as BaseRouteScanner;
 
 class Scanner extends BaseRouteScanner {
@@ -79,7 +80,7 @@ class Scanner extends BaseRouteScanner {
             //'description' => 'desc...',
             'version' => $version,
             'protocols' => [ 'HTTPS' ],
-            'baseUri' => \URL::to('/'),
+            'baseUri' => URL::to('/'),
             'mediaType' => [ 'application/json' ],
             //'securedBy' => [ 'oauth_2_0' ],
             'documenation' => [
