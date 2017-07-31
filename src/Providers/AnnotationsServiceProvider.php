@@ -9,12 +9,43 @@ use DreamHack\SDK\Http\Controllers\ManifestController;
 class AnnotationsServiceProvider extends ServiceProvider {
 
     /**
+     * Determines if we will auto-scan in the local environment.
+     *
+     * @var bool
+     */
+    protected $scanWhenLocal = true;
+
+    /**
+     * Determines whether or not to automatically scan the controllers
+     * directory (App\Http\Controllers) for routes
+     *
+     * @var bool
+     */
+    protected $scanControllers = true;
+
+    /**
+     * Determines whether or not to automatically scan all namespaced
+     * classes for event, route, and model annotations.
+     *
+     * @var bool
+     */
+    protected $scanEverything = false;
+
+    /**
      * The classes to scan for route annotations.
      *
      * @var array
      */
     protected $scanRoutes = [
-      ManifestController::class,
+        ManifestController::class,
+    ];
+
+    /**
+     * Additional namespaces to scan for routes.
+     *
+     * @var array
+     */
+    protected $additionalRouteNamespaces = [
     ];
 
     protected $servicesToLoad = [  
@@ -49,6 +80,25 @@ class AnnotationsServiceProvider extends ServiceProvider {
     {
         parent::addRoutingAnnotations($scanner);
         $scanner->addAnnotationNamespace( 'DreamHack\SDK\Annotations', __DIR__.'/../Annotations' );
+    }
+
+
+    /**
+     * Get the classes to be scanned by the provider.
+     *
+     * @return array
+     */
+    public function routeScans()
+    {
+        if ($this->scanEverything) {
+            return $this->getAllClasses();
+        }
+        $routes = parent::routeScans();
+        foreach($this->additionalRouteNamespaces as $namespace) {
+            $routes = array_merge($this->getClassesFromNamespace($namespace), $routes);
+        }
+        $routes = array_merge($this->scanRoutes, $routes);
+        return $routes;
     }
 
     /**

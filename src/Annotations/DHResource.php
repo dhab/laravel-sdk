@@ -14,8 +14,12 @@ class DHResource extends Resource {
      */
     public function modifyCollection(EndpointCollection $endpoints, ReflectionClass $class)
     {
-      $this->values['value'] = ($this->values['version']?:'0')."/".env('API_PREFIX', 'content').'/'.$this->values['value'];
-    	parent::modifyCollection($endpoints, $class);
+        $this->values['value'] = ($this->values['version']?:'0')."/".env('API_PREFIX', 'content').'/'.$this->values['value'];
+        $endpoints->push(new ResourceEndpoint([
+            'reflection' => $class, 'name' => $this->value, 'names' => (array) $this->names,
+            'only'       => (array) $this->only, 'except' => (array) $this->except,
+            'middleware' => $this->getMiddleware($endpoints), 'as' => $this->as,
+        ]));
         $this->prefixApiVersions($endpoints);
     }
 
@@ -25,7 +29,7 @@ class DHResource extends Resource {
     public function prefixApiVersions(EndpointCollection $endpoints)
     {
         foreach ($endpoints->getAllPaths() as $path) {
-            $path->version = $this->version;
+            $path->version = $this->values['version'];
         }
     }
 }

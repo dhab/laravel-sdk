@@ -24,7 +24,7 @@ class ManifestController extends BaseController
     /**
      * Display generated API documentation in RAML 1.0 format.a
      * @SkipAuth
-     * @Get("raml", as="raml", middleware="web")
+     * @Get("manifest.raml", as="raml", middleware="web")
      * @return \DreamHack\SDK\Http\Responses\Raml
      */
     public function raml()
