@@ -54,6 +54,7 @@ class AnnotationsServiceProvider extends ServiceProvider {
         FakerServiceProvider::class,
         GuzzleServiceProvider::class,
         ResponseServiceProvider::class,
+        ValidationServiceProvider::class,
     ];
     /**
      * Register the service provider.

@@ -4,6 +4,7 @@ namespace DreamHack\SDK\Http;
 use DreamHack\SDK\Http\Requests\ModelRequest;
 use DreamHack\SDK\Http\Responses\ModelResponse;
 use DreamHack\SDK\Http\Responses\InstantiableModelResponse;
+use Illuminate\Http\Request;
 
 trait Resource {
     public abstract static function getClass();
@@ -19,9 +20,13 @@ trait Resource {
     /**
      * Get base request for fetching resource.
      */
-    private static function query() {
+    protected static function query() {
         $class = static::getClass();
         return $class::ordered()->with(static::getDefaultRelations());
+    }
+
+    protected static function findOrFail($id) {
+        return static::query()->findOrFail($id);
     }
 
     /**
@@ -42,7 +47,7 @@ trait Resource {
      */
     public function index()
     {
-        $items = self::query()->get();
+        $items = static::query()->get();
         return self::response($items);
     }
     /**
@@ -52,7 +57,49 @@ trait Resource {
      */
     public function show($id)
     {
-        $item = self::query()->findOrFail($id);
+        $item = static::findOrFail($id);
         return self::response($item);
     }
+
+    private static function getRequiredFields() {
+        $class = static::getClass();
+        return $class::getRequiredFields();
+    }
+    private static function getFieldValidators() {
+        $class = static::getClass();
+        return $class::getFieldValidators();
+    }
+
+    protected static function getValidationRules($indicate_required = false) {
+        $required = self::getRequiredFields();
+        $rules = self::getFieldValidators();
+
+        foreach ($rules as $key => $rule) {
+            $val = "nullable";
+            if(in_array($key, $required)) {
+                if($indicate_required) {
+                    $val = "required";
+                } else {
+                    continue;
+                }
+            }
+            if(is_array($rule)) {
+                array_unshift($rules[$key], $val);
+            } else {
+                $rules[$key] = $val."|".$rule;
+            }
+        }
+        foreach($required as $field) {
+            if(!isset($rules[$field])) {
+                $rules[$field] = "required";
+            }
+        }
+        return $rules;
+    }
+
+    public function store(Request $request) {
+        $ret = $this->validate($request, static::getValidationRulesCreate());
+
+        dd($ret);
+    } 
 }

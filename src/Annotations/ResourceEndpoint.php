@@ -19,7 +19,7 @@ class ResourceEndpoint extends BaseEndpoint
         "batch" => "put",
         "batchDestroy" => "post"
     ];
-    protected $methods = ['index', 'create', 'store', 'show', 'edit', 'update', 'destroy', 'batch', 'batchDestroy'];
+    protected $methods = ['index', 'store', 'show', 'update', 'destroy', 'batch', 'batchDestroy'];
 
     /**
      * Create a new route definition instance.
