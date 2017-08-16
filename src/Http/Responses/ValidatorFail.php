@@ -12,7 +12,7 @@ use Validator;
  **/
 
 class ValidatorFail extends Response {
-    function __construct(Valdiator $validator = null, $key = null) {
+    function __construct(Validator $validator = null, $key = null) {
         if ( !$validator ) 
             return parent::__construct();
 
