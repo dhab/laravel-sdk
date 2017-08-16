@@ -2,7 +2,7 @@
 
 namespace DreamHack\SDK\Http\Responses;
 
-use Illumate\Validation\Validator;
+use Illuminate\Validation\Validator;
 
 /**
  * Input validation failed, returns the first error 
