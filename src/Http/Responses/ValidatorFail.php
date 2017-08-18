@@ -2,7 +2,7 @@
 
 namespace DreamHack\SDK\Http\Responses;
 
-use Validator;
+use Illuminate\Validation\Validator;
 
 /**
  * Input validation failed, returns the first error 
@@ -12,7 +12,7 @@ use Validator;
  **/
 
 class ValidatorFail extends Response {
-    function __construct(Valdiator $validator = null, $key = null) {
+    function __construct(Validator $validator = null, $key = null) {
         if ( !$validator ) 
             return parent::__construct();
 
