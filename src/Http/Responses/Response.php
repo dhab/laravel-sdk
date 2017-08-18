@@ -1,6 +1,7 @@
 <?php
 
 namespace DreamHack\SDK\Http\Responses;
+use Carbon\Carbon;
 use Illuminate\Http\Response as IlluminateResponse;
 
 class Response extends IlluminateResponse {
@@ -35,6 +36,10 @@ class Response extends IlluminateResponse {
 			$ret = [];
 			foreach($fields as $field => $castType) {
 				$value = $row->$field;
+                if($value === null) {
+                    $ret[$field] = $value;
+                    continue;
+                }
 				switch ($castType) {
 					case 'int':
 					case 'integer':
@@ -57,13 +62,13 @@ class Response extends IlluminateResponse {
 						$value = new BaseCollection($value);
 						break;
 					case 'date':
-						$value = $this->asDate($value);
+						$value = static::asDate($value);
 						break;
 					case 'datetime':
-						$value = $this->asDateTime($value);
+						$value = static::asDateTime($value);
 						break;
 					case 'timestamp':
-						$value = $this->asTimestamp($value);
+						$value = static::asTimestamp($value);
 						break;
 					case 'self':
 						if($value) {
@@ -103,7 +108,7 @@ class Response extends IlluminateResponse {
      * @param  bool  $asObject
      * @return mixed
      */
-    public function fromJson($value, $asObject = false)
+    public static function fromJson($value, $asObject = false)
     {
         return json_decode($value, ! $asObject);
     }
@@ -114,9 +119,9 @@ class Response extends IlluminateResponse {
      * @param  mixed  $value
      * @return \Carbon\Carbon
      */
-    protected function asDate($value)
+    protected static function asDate($value)
     {
-        return $this->asDateTime($value)->startOfDay();
+        return static::asDateTime($value)->startOfDay();
     }
 
     /**
@@ -125,7 +130,7 @@ class Response extends IlluminateResponse {
      * @param  mixed  $value
      * @return \Carbon\Carbon
      */
-    protected function asDateTime($value)
+    protected static function asDateTime($value)
     {
         // If this value is already a Carbon instance, we shall just return it as is.
         // This prevents us having to re-instantiate a Carbon instance when we know
@@ -153,7 +158,7 @@ class Response extends IlluminateResponse {
         // If the value is in simply year, month, day format, we will instantiate the
         // Carbon instances from that format. Again, this provides for simple date
         // fields on the database, while still supporting Carbonized conversion.
-        if ($this->isStandardDateFormat($value)) {
+        if (static::isStandardDateFormat($value)) {
             return Carbon::createFromFormat('Y-m-d', $value)->startOfDay();
         }
 
@@ -161,8 +166,12 @@ class Response extends IlluminateResponse {
         // the database connection and use that format to create the Carbon object
         // that is returned back out to the developers after we convert it here.
         return Carbon::createFromFormat(
-            $this->getDateFormat(), $value
+            static::getDateFormat(), $value
         );
+    }
+
+    public static function getDateFormat() {
+        return 'Y-m-d H:i:s';
     }
 
     /**
@@ -171,7 +180,7 @@ class Response extends IlluminateResponse {
      * @param  string  $value
      * @return bool
      */
-    protected function isStandardDateFormat($value)
+    protected static function isStandardDateFormat($value)
     {
         return preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})$/', $value);
     }
@@ -182,10 +191,10 @@ class Response extends IlluminateResponse {
      * @param  \DateTime|int  $value
      * @return string
      */
-    public function fromDateTime($value)
+    public static function fromDateTime($value)
     {
-        return $this->asDateTime($value)->format(
-            $this->getDateFormat()
+        return static::asDateTime($value)->format(
+            static::getDateFormat()
         );
     }
 
@@ -195,8 +204,8 @@ class Response extends IlluminateResponse {
      * @param  mixed  $value
      * @return int
      */
-    protected function asTimestamp($value)
+    protected static function asTimestamp($value)
     {
-        return $this->asDateTime($value)->getTimestamp();
+        return static::asDateTime($value)->getTimestamp();
     }
 }
