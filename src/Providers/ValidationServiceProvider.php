@@ -24,6 +24,9 @@ class ValidationServiceProvider extends ServiceProvider
         Validator::extend('language', function ($attribute, $value, $parameters, $validator) {
             return isset(static::$languages[$value]);
         });
+        Validator::replacer('language', function ($message, $attribute, $rule, $parameters) {
+            return "The ".$attribute." field must be a valid language.";
+        });
         Validator::extend('uuid', function($attribute, $value, $parameters, $validator) {
             try {
                 $uuid = Uuid::fromString($value);
@@ -31,6 +34,9 @@ class ValidationServiceProvider extends ServiceProvider
                 return false;
             }
             return true;
+        });
+        Validator::replacer('uuid', function ($message, $attribute, $rule, $parameters) {
+            return "The ".$attribute." field must be a valid uuid.";
         });
     }
 
