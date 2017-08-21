@@ -41,26 +41,6 @@ trait Resource {
         }
     }
 
-    /**
-     * Display a listing of the resource.
-     * @return DreamHack\SDK\Http\Responses\ModelResponse[]
-     */
-    public function index()
-    {
-        $items = static::query()->get();
-        return self::response($items);
-    }
-    /**
-     * Display the specified resource.
-     * @param  uuid  $id
-     * @return DreamHack\SDK\Http\Responses\ModelResponse
-     */
-    public function show($id)
-    {
-        $item = static::findOrFail($id);
-        return self::response($item);
-    }
-
     private static function getRequiredFields() {
         $class = static::getClass();
         return $class::getRequiredFields();
@@ -97,16 +77,81 @@ trait Resource {
         return $rules;
     }
 
+    /**
+     * Display a listing of the resource.
+     * @return DreamHack\SDK\Http\Responses\InstantiableModelResponse
+     */
+    public function index()
+    {
+        $items = static::query()->get();
+        return self::response($items);
+    }
+    /**
+     * Display the specified resource.
+     * @param  uuid  $id
+     * @return DreamHack\SDK\Http\Responses\InstantiableModelResponse
+     */
+    public function show($id)
+    {
+        $item = static::findOrFail($id);
+        return self::response($item);
+    }
+
+    /**
+     * Create a new record of the resource.
+     * @param  Request $request
+     * @return DreamHack\SDK\Http\Responses\InstantiableModelResponse
+     */
     public function store(Request $request) {
         $rules = static::getValidationRules(true);
         $this->validate($request, $rules);
-        $validated = $request->only(array_keys($rules));
+        $validated = collect($request->all())->only(array_keys($rules))->all();
         $class = static::getClass();
-        $item = (new $class())->forceFill($validated);
+        $item = (new $class())->fill($validated);
         if(!$item->save()) {
             // handle db error
         }
         $item->load(static::getDefaultRelations());
         return self::response($item);
+    }
+
+    /**
+     * Update an existing record of the resource
+     * @param  Request $request
+     * @param  string $id
+     * @return DreamHack\SDK\Http\Responses\InstantiableModelResponse
+     */
+    public function update(Request $request, $id) {
+        $class = static::getClass();
+        
+        $item = $class::findOrFail($id);
+
+        $rules = static::getValidationRules();
+        $this->validate($request, $rules);
+        $validated = collect($request->all())->only(array_keys($rules))->all();
+        $item->fill($validated);
+        if(!$item->save()) {
+            // handle db error
+        }
+        $item->load(static::getDefaultRelations());
+        return self::response($item);
+    }
+
+    /**
+     * Delete a record of the resource
+     * @param  Request $request
+     * @param  string $id
+     * @return DreamHack\SDK\Http\Responses\BooleanResponse
+     */
+    public function destroy(Request $request, $id) {
+        $class = static::getClass();
+
+        $item = $class::findOrFail($id);
+
+        if($item->delete()) {
+            return response()->true();
+        } else {
+            return response()->false();
+        }
     }
 }
