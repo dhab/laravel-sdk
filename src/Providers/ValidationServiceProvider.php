@@ -5,7 +5,8 @@ namespace DreamHack\SDK\Providers;
 use Illuminate\Support\ServiceProvider;
 use Gettext\Languages\Language;
 use Illuminate\Support\Facades\Validator;
-
+use Ramsey\Uuid\Uuid;
+use Exception;
 
 class ValidationServiceProvider extends ServiceProvider
 {
@@ -22,6 +23,14 @@ class ValidationServiceProvider extends ServiceProvider
         }
         Validator::extend('language', function ($attribute, $value, $parameters, $validator) {
             return isset(static::$languages[$value]);
+        });
+        Validator::extend('uuid', function($attribute, $value, $parameters, $validator) {
+            try {
+                $uuid = Uuid::fromString($value);
+            } catch(Exception $e) {
+                return false;
+            }
+            return true;
         });
     }
 
