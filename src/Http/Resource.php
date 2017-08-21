@@ -98,8 +98,15 @@ trait Resource {
     }
 
     public function store(Request $request) {
-        $ret = $this->validate($request, static::getValidationRules(true));
-
-        dd($ret);
-    } 
+        $rules = static::getValidationRules(true);
+        $this->validate($request, $rules);
+        $validated = $request->only(array_keys($rules));
+        $class = static::getClass();
+        $item = (new $class())->forceFill($validated);
+        if(!$item->save()) {
+            // handle db error
+        }
+        $item->load(static::getDefaultRelations());
+        return self::response($item);
+    }
 }
