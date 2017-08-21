@@ -98,7 +98,7 @@ trait Resource {
     }
 
     public function store(Request $request) {
-        $ret = $this->validate($request, static::getValidationRulesCreate());
+        $ret = $this->validate($request, static::getValidationRules(true));
 
         dd($ret);
     } 
