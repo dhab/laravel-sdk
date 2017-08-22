@@ -19,7 +19,7 @@ class ResourceEndpoint extends BaseEndpoint
         "batch" => "put",
         "batchDestroy" => "post"
     ];
-    protected $methods = ['index', 'store', 'show', 'update', 'destroy', 'batch', 'batchDestroy'];
+    protected $methods = ['batch', 'batchDestroy', 'index', 'store', 'show', 'update', 'destroy'];
 
     /**
      * Create a new route definition instance.
@@ -113,14 +113,13 @@ class ResourceEndpoint extends BaseEndpoint
                 $routes[] = sprintf(
                     $this->getCustomTemplate(),
                     $path->verb,
-                    $path->path,
+                    $this->getURIForPath($path),
                     $this->reflection->name."@".$path->method, // $uses
                     var_export($path->as, true),
                     $this->implodeArray($this->getCustomMiddleware($path->method)),
                     $this->implodeArray($path->where),
                     var_export($path->domain, true)
                 );
-                // dd(end($routes));
             } else {
                 $routes[] = sprintf(
                     $this->getTemplate(), 'Resource: '.$this->name.'@'.$path->method,
