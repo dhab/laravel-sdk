@@ -177,4 +177,58 @@ trait Resource {
         return response()->true();
     }
 
+    /**
+     * Batch update & create multiple records of the resource
+     * @param  Request $request
+     * @return DreamHack\SDK\Http\Responses\InstantiableModelResponse
+     */
+    public function batch(Request $request) {
+        $class = static::getClass();
+        $model = new $class;
+        $createRules = static::getValidationRules(true);
+        $updateRules = static::getValidationRules();
+        if(!isset($updateRules[$model->getKeyName()])) {
+            $updateRules[$model->getKeyName()] = [];
+        }
+        $updateRules[$model->getKeyName()][] = Rule::relation($class);
+
+        $rules = [
+            "create" => ["required", "array"],
+            "update" => ["required", "array"],
+        ];
+        foreach($createRules as $key => $rule) {
+            $rules["create.*.".$key] = $rule;
+        }
+        foreach($updateRules as $key => $rule) {
+            $rules["update.*.".$key] = $rule;
+        }
+        $this->validate($request, $rules);
+
+        $return = collect([]);
+        DB::transaction(function() use($class, $createRules, $updateRules, $request, $return, $model) {
+            collect($request->get('create'))->each(function($row) use ($createRules, $class, $return) {
+                $validated = collect($row)->only(array_keys($createRules))->all();
+                $item = (new $class())->fill($validated);
+                if(!$item->save()) {
+                    throw new Exception("Couldn't create model.");
+                }
+                $return->push($item);
+            });
+            collect($request->get('update'))->each(function($row) use ($updateRules, $class, $return, $model) {
+                $validated = collect($row)->only(array_keys($updateRules))->except($model->getKeyName())->all();
+                $item = $class::findOrFail($row[$model->getKeyName()]);
+                $item->fill($validated);
+                if(!$item->save()) {
+                    throw new Exception("Couldn't update model.");
+                }
+                $return->push($item);
+            });
+        });
+        $return->each(function($item) {
+            $item->load(static::getDefaultRelations());
+        });
+        return self::response($return);
+
+    }
+
 }
