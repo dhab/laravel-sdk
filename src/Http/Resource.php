@@ -4,7 +4,10 @@ namespace DreamHack\SDK\Http;
 use DreamHack\SDK\Http\Requests\ModelRequest;
 use DreamHack\SDK\Http\Responses\ModelResponse;
 use DreamHack\SDK\Http\Responses\InstantiableModelResponse;
+use DreamHack\SDK\Validation\Rule;
 use Illuminate\Http\Request;
+use DB;
+use Validator;
 
 trait Resource {
     public abstract static function getClass();
@@ -154,4 +157,24 @@ trait Resource {
             return response()->false();
         }
     }
+    
+    /**
+     * Delete multiple records of the resource
+     * @param  Request $request
+     * @return DreamHack\SDK\Http\Responses\BooleanResponse
+     */
+    public function batchDestroy(Request $request) {
+        $class = static::getClass();
+        $validator = Validator::make($request->all(), ["*" => [Rule::relation($class)]]);
+        $validator->validate();
+        DB::transaction(function() use ($class, $request) {
+            $items = $request->all();
+            foreach($items as $id) {
+                $item = $class::findOrFail($id);
+                $item->delete();
+            }
+        });
+        return response()->true();
+    }
+
 }
