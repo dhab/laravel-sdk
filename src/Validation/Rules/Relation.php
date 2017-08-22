@@ -3,6 +3,7 @@
 namespace DreamHack\SDK\Validation\Rules;
 
 use Illuminate\Validation\Rules\Exists;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Relation extends Exists
 {
@@ -26,5 +27,8 @@ class Relation extends Exists
         $table = $model->getTable();
         $column = $model->getKeyName();
         parent::__construct($table, $column);
+        if(method_exists($model, 'getDeletedAtColumn')) {
+            $this->whereNull($model->getDeletedAtColumn());
+        }
     }
 }
