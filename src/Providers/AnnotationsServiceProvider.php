@@ -125,7 +125,6 @@ class AnnotationsServiceProvider extends ServiceProvider {
     }
 
     public function getManifest($skipClass = false) {
-        dd($this->getScanner());
         return $this->getScanner()->getManifest($skipClass);
     }
 

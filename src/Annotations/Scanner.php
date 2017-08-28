@@ -37,7 +37,6 @@ class Scanner extends BaseRouteScanner {
                         $uriParts = explode('/', $endpoint->getURIForPath($path));
                     } else {
                         if(empty($path->path)) {
-                            dd($path, get_class_methods($path), $endpoint, get_class_methods($endpoint));
                             continue;
                         }
                         $uriParts = explode('/', $path->path);
