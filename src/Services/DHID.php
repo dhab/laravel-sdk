@@ -36,10 +36,13 @@ class DHID extends Client{
      * Send all queued updates to the socket API
      */
     public function sendUpdates() {
+        if ( !env('SOCKET_BASE_URL') )
+            return;
+
         foreach($this->updates as $url => $bool) {
             if($bool) {
                 try {
-                    Guzzle::request('GET', env('SOCKET_BASE_URL', 'http://localhost:8085/').'update'.$url);
+                    Guzzle::request('GET', env('SOCKET_BASE_URL').'update'.$url);
                 } catch(Exception $e) {
                     Log::info("Exception while updating url: ".$url.", ".$e->getMessage());
                 }
