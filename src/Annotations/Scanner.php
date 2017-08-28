@@ -3,7 +3,10 @@
 namespace DreamHack\SDK\Annotations;
 use App;
 use Cache;
-use \Collective\Annotations\Routing\Annotations\Scanner as BaseRouteScanner;
+use URL;
+use DreamHack\SDK\Documentation\Raml;
+use Collective\Annotations\Routing\Annotations\Scanner as BaseRouteScanner;
+use Collective\Annotations\Routing\Annotations\ResourceEndpoint;
 
 class Scanner extends BaseRouteScanner {
     private $cache_key = "manifest";
@@ -25,12 +28,20 @@ class Scanner extends BaseRouteScanner {
                     continue;
                 }
                 foreach($endpoint->getPaths() as $path) {
-                    $method = strtoupper($path->verb);
-                    $uriParts = explode('/', $path->path);
                     if(!isset($path->version)) {
                         continue;
                     }
-                    $version = array_shift($uriParts);
+                    $version = $path->version;
+                    $method = strtoupper($path->verb);
+                    if($endpoint instanceof ResourceEndpoint) {
+                        $uriParts = explode('/', $endpoint->getURIForPath($path));
+                    } else {
+                        if(empty($path->path)) {
+                            continue;
+                        }
+                        $uriParts = explode('/', $path->path);
+                    }
+                    array_shift($uriParts);
                     array_shift($uriParts);
                     $url = str_replace("//", "/", "^/".implode($uriParts, '/')."/?$");
                     $url = preg_replace("/{\w+}/", "*", $url);
@@ -79,7 +90,7 @@ class Scanner extends BaseRouteScanner {
             //'description' => 'desc...',
             'version' => $version,
             'protocols' => [ 'HTTPS' ],
-            'baseUri' => \URL::to('/'),
+            'baseUri' => URL::to('/'),
             'mediaType' => [ 'application/json' ],
             //'securedBy' => [ 'oauth_2_0' ],
             'documenation' => [
@@ -88,7 +99,7 @@ class Scanner extends BaseRouteScanner {
                     'content' => "### markdown header\ntesting"
                 ]
             ],
-        ]);
+        ], $skipClass);
 
         $raml->addEndpoints($this->getEndpointsInClasses($this->getReader()));
 

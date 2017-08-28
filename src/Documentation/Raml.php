@@ -1,6 +1,6 @@
 <?php
 
-namespace DreamHack\SDK\Annotations;
+namespace DreamHack\SDK\Documentation;
 
 use DB;
 use DreamHack\SDK\Facades\Fake;
@@ -85,15 +85,26 @@ class Raml {
             ]
         ]
     ];
+    private $classesToSkip;
+    private function shouldSkip($class) {
+        return $this->classesToSkip->has($class);
+    }
 
-
-    function __construct(array $params = []) {
+    function __construct(array $params = [], $skipClass = false) {
         $this->params = array_merge($this->params, $params);
+        if(is_array($skipClass)) {
+            $this->classesToSkip = collect($skipClass);
+        } else {
+            $this->classesToSkip = collect([$skipClass]);
+        }
     }
 
     public function addEndpoints($endpoints) {
         $result = [];
         foreach( $endpoints as $key => $endpoint ) {
+            if($this->shouldSkip($endpoint->reflection->name)) {
+                continue;
+            }
             $doc = $endpoint->reflection->getMethod($endpoint->method)->getDocComment();
             $doc = preg_replace("/^([^\*\/]*)(\/\*\*| \*|\*\/)/m", "", $doc, -1); // Remove the comment chars
             $doc = explode('@', $doc);

@@ -1,8 +1,6 @@
 <?php
 
 namespace DreamHack\SDK\Facades;
-
-use DreamHack\SDK\Providers\AnnotationsServiceProvider;
 use Illuminate\Support\Facades\Facade;
 
 /**
@@ -17,6 +15,6 @@ class Manifest extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return AnnotationsServiceProvider::class;
+        return 'annotations.manifest.scanner';
     }
 }

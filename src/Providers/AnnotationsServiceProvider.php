@@ -9,12 +9,43 @@ use DreamHack\SDK\Http\Controllers\ManifestController;
 class AnnotationsServiceProvider extends ServiceProvider {
 
     /**
+     * Determines if we will auto-scan in the local environment.
+     *
+     * @var bool
+     */
+    protected $scanWhenLocal = true;
+
+    /**
+     * Determines whether or not to automatically scan the controllers
+     * directory (App\Http\Controllers) for routes
+     *
+     * @var bool
+     */
+    protected $scanControllers = true;
+
+    /**
+     * Determines whether or not to automatically scan all namespaced
+     * classes for event, route, and model annotations.
+     *
+     * @var bool
+     */
+    protected $scanEverything = false;
+
+    /**
      * The classes to scan for route annotations.
      *
      * @var array
      */
     protected $scanRoutes = [
-      ManifestController::class,
+        ManifestController::class,
+    ];
+
+    /**
+     * Additional namespaces to scan for routes.
+     *
+     * @var array
+     */
+    protected $additionalRouteNamespaces = [
     ];
 
     protected $servicesToLoad = [  
@@ -23,6 +54,7 @@ class AnnotationsServiceProvider extends ServiceProvider {
         FakerServiceProvider::class,
         GuzzleServiceProvider::class,
         ResponseServiceProvider::class,
+        ValidationServiceProvider::class,
     ];
     /**
      * Register the service provider.
@@ -51,6 +83,25 @@ class AnnotationsServiceProvider extends ServiceProvider {
         $scanner->addAnnotationNamespace( 'DreamHack\SDK\Annotations', __DIR__.'/../Annotations' );
     }
 
+
+    /**
+     * Get the classes to be scanned by the provider.
+     *
+     * @return array
+     */
+    public function routeScans()
+    {
+        if ($this->scanEverything) {
+            return $this->getAllClasses();
+        }
+        $routes = parent::routeScans();
+        foreach($this->additionalRouteNamespaces as $namespace) {
+            $routes = array_merge($this->getClassesFromNamespace($namespace), $routes);
+        }
+        $routes = array_merge($this->scanRoutes, $routes);
+        return $routes;
+    }
+
     /**
      * Register the scanner.
      *
@@ -62,18 +113,14 @@ class AnnotationsServiceProvider extends ServiceProvider {
             $scanner = new ManifestScanner([]);
             $this->addRoutingAnnotations($scanner);
             $scanner->addAnnotationNamespace( 'Collective\Annotations\Routing\Annotations\Annotations', base_path().'/vendor/laravelcollective/annotations/src/Routing/Annotations/Annotations' );
+            $scanner->setClassesToScan($this->routeScans());
             return $scanner;
         });
     }
 
-    private function getScanner() {
+    protected function getScanner() {
         $this->app->make('annotations.route.scanner');
         $scanner = $this->app->make('annotations.manifest.scanner');
-        $classes = array_merge(
-          $this->scanRoutes,
-          $this->getClassesFromNamespace($this->getAppNamespace().'Http\\Controllers')
-        );
-        $scanner->setClassesToScan($classes);
         return $scanner;
     }
 
