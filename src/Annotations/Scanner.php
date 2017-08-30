@@ -8,6 +8,33 @@ use DreamHack\SDK\Documentation\Raml;
 use Collective\Annotations\Routing\Annotations\Scanner as BaseRouteScanner;
 use Collective\Annotations\Routing\Annotations\ResourceEndpoint;
 
+
+function getLength($endpoint) {
+    $paths = [];
+    foreach($endpoint->getPaths() as $path) {
+        if($endpoint instanceof ResourceEndpoint) {
+            $paths[] = $endpoint->getURIForPath($path);
+        } else {
+            $paths[] = $path->path;
+        }
+    }
+    
+    usort($paths, function($a, $b) {
+        return (strlen($a) > strlen($b)) ? -1 : 1;
+    });
+    $path = $paths[0]??'';
+    
+
+    $min_wildcards = 0;
+    $wildcards = array_reduce(array_map(function($item) {
+        return preg_match_all("/{\w+}/", $item);
+    }, $paths), "min", PHP_INT_MAX);
+    return [
+        strlen($path),
+        $wildcards==PHP_INT_MAX?0:$wildcards,
+    ];
+}
+
 class Scanner extends BaseRouteScanner {
     private $cache_key = "manifest";
 
@@ -73,6 +100,42 @@ class Scanner extends BaseRouteScanner {
                 Cache::put($this->cache_key, $manifest, 5);
         }
         return $manifest;
+    }
+
+    /**
+     * Convert the scanned annotations into route definitions.
+     *
+     * @return string
+     */
+    public function getRouteDefinitions()
+    {
+        $output = '';
+        $endpointsCollection = $this->getEndpointsInClasses($this->getReader());
+        $endpoints = [];
+        foreach($endpointsCollection as $endpoint) {
+            $endpoints[] = $endpoint;
+        }
+        $unsortedEndpoints = $endpoints;
+        usort($endpoints, function($a, $b) {
+            $a = getLength($a);
+            $b = getLength($b);
+            if($a[1] < $b[1]) {
+                return -1;
+            } else if($a[1] > $b[1]) {
+                return 1;
+            } else if($a[0] > $b[0]) {
+                return -1;
+            } else if($b[0] > $a[0]) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+        foreach ($endpoints as $endpoint) {
+            $output .= $endpoint->toRouteDefinition().PHP_EOL.PHP_EOL;
+        }
+
+        return trim($output);
     }
 
     public function getRAMLManifest($skipClass = false) {

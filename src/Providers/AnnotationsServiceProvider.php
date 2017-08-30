@@ -102,6 +102,29 @@ class AnnotationsServiceProvider extends ServiceProvider {
         return $routes;
     }
 
+
+    /**
+     * Scan the routes and write the scanned routes file.
+     *
+     * @return void
+     */
+    protected function scanRoutes()
+    {
+        $scans = $this->routeScans();
+
+        if (empty($scans)) {
+            return;
+        }
+
+        $scanner = $this->app->make('annotations.route.scanner');
+
+        $scanner->setClassesToScan($scans);
+
+        file_put_contents(
+          $this->finder->getScannedRoutesPath(), '<?php '.$scanner->getRouteDefinitions()
+        );
+    }
+
     /**
      * Register the scanner.
      *
@@ -109,13 +132,12 @@ class AnnotationsServiceProvider extends ServiceProvider {
      */
     protected function registerManifestScanner()
     {
-        $this->app->singleton('annotations.manifest.scanner', function ($app) {
-            $scanner = new ManifestScanner([]);
-            $this->addRoutingAnnotations($scanner);
-            $scanner->addAnnotationNamespace( 'Collective\Annotations\Routing\Annotations\Annotations', base_path().'/vendor/laravelcollective/annotations/src/Routing/Annotations/Annotations' );
-            $scanner->setClassesToScan($this->routeScans());
-            return $scanner;
-        });
+        $scanner = new ManifestScanner([]);
+        $this->addRoutingAnnotations($scanner);
+        $scanner->addAnnotationNamespace( 'Collective\Annotations\Routing\Annotations\Annotations', base_path().'/vendor/laravelcollective/annotations/src/Routing/Annotations/Annotations' );
+        $scanner->setClassesToScan($this->routeScans());
+        $this->app->instance('annotations.manifest.scanner', $scanner);
+        $this->app->instance('annotations.route.scanner', $scanner);
     }
 
     protected function getScanner() {
