@@ -17,9 +17,6 @@ trait Resource {
         return $class::getDefaultRelations();
     }
 
-    // public abstract static function getResponseClass();
-    public abstract static function getRequestClass();
-
     /**
      * Get base request for fetching resource.
      */

@@ -2,7 +2,7 @@
 
 namespace DreamHack\SDK\Http\Controllers;
 
-use Manifest;
+use DreamHack\SDK\Facades\Manifest;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
 use DreamHack\SDK\Http\Responses;
@@ -13,7 +13,7 @@ class ManifestController extends BaseController
     /**
      * Display a listing of the resource.
      * @SkipAuth
-     * @Get("manifest", as="manifest", middleware="web")
+     * @Get("manifest", as="manifest")
      * @return \DreamHack\SDK\Http\Responses\Manifest
      */
     public function manifest()
@@ -24,7 +24,7 @@ class ManifestController extends BaseController
     /**
      * Display generated API documentation in RAML 1.0 format.a
      * @SkipAuth
-     * @Get("manifest.raml", as="raml", middleware="web")
+     * @Get("manifest.raml", as="raml")
      * @return \DreamHack\SDK\Http\Responses\Raml
      */
     public function raml()
