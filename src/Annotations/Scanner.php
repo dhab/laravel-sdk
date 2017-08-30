@@ -117,15 +117,15 @@ class Scanner extends BaseRouteScanner {
         }
         $unsortedEndpoints = $endpoints;
         usort($endpoints, function($a, $b) {
-            $a = getLength($a);
-            $b = getLength($b);
-            if($a[1] < $b[1]) {
+            list($lengthA, $wildcardsA) = getLength($a);
+            list($lengthB, $wildcardsB) = getLength($b);
+            if($wildcardsA < $wildcardsB) {
                 return -1;
-            } else if($a[1] > $b[1]) {
+            } else if($wildcardsA > $wildcardsB) {
                 return 1;
-            } else if($a[0] > $b[0]) {
+            } else if($lengthA > $lengthB) {
                 return -1;
-            } else if($b[0] > $a[0]) {
+            } else if($lengthB > $lengthA) {
                 return 1;
             } else {
                 return 0;
