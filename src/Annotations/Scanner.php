@@ -45,8 +45,8 @@ class Scanner extends BaseRouteScanner {
         }
         if(!$manifest) {
             $manifest = [
-                "uuid" => env('API_UUID', '15372CD5-C9F7-4F5F-A3F2-9810AB55B9CF'),
-                "prefix" => env('API_PREFIX', 'content'),
+                "uuid" => env('API_UUID'),
+                "prefix" => env('API_PREFIX'),
                 "endpoints" => [],
             ];
             $endpoints = $this->getEndpointsInClasses($this->getReader());
