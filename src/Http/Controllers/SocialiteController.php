@@ -89,7 +89,7 @@ class SocialiteController extends Controller
      */
     private function findOrCreateUser($dhidUser)
     {
-        $userModel = config('auth.providers.dhid.model','\App\User');
+        $userModel = config('services.dhid.model','\App\User');
 
         if (!$user = $userModel::where('dhid', $dhidUser->id)->first()) { // Find based on UUID
             if (!$user = $userModel::where('email', $dhidUser->email)->first()) { // Find based on email
