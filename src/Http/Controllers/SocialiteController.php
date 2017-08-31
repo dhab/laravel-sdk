@@ -7,7 +7,6 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
 use Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
-use App\User;
 use Auth;
 
 class SocialiteController extends Controller
@@ -90,9 +89,11 @@ class SocialiteController extends Controller
      */
     private function findOrCreateUser($dhidUser)
     {
-        if (!$user = User::where('dhid', $dhidUser->id)->first()) { // Find based on UUID
-            if (!$user = User::where('email', $dhidUser->email)->first()) { // Find based on email
-                $user = New User([ // Create a new user
+        $userModel = config('auth.providers.dhid.model','\App\User');
+
+        if (!$user = $userModel::where('dhid', $dhidUser->id)->first()) { // Find based on UUID
+            if (!$user = $userModel::where('email', $dhidUser->email)->first()) { // Find based on email
+                $user = New $userModel([ // Create a new user
                     'password' => '',
                 ]);
             }
