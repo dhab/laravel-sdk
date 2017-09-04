@@ -29,6 +29,11 @@ trait Resource {
         return static::query()->findOrFail($id);
     }
 
+    protected static function getId() {
+        $route = request()->route();
+        return $route->parameter(end($route->parameterNames));
+    }
+
     /**
      * Format response object
      */
@@ -86,14 +91,15 @@ trait Resource {
         $items = static::query()->get();
         return self::response($items);
     }
+
     /**
      * Display the specified resource.
      * @param  uuid  $id
      * @return DreamHack\SDK\Http\Responses\InstantiableModelResponse
      */
-    public function show($id)
+    public function show()
     {
-        $item = static::findOrFail($id);
+        $item = static::findOrFail(static::getId());
         return self::response($item);
     }
 
@@ -121,10 +127,10 @@ trait Resource {
      * @param  string $id
      * @return DreamHack\SDK\Http\Responses\InstantiableModelResponse
      */
-    public function update(Request $request, $id) {
+    public function update(Request $request) {
         $class = static::getClass();
         
-        $item = $class::findOrFail($id);
+        $item = $class::findOrFail(static::getId());
 
         $rules = static::getValidationRules();
         $this->validate($request, $rules);
@@ -143,10 +149,10 @@ trait Resource {
      * @param  string $id
      * @return DreamHack\SDK\Http\Responses\BooleanResponse
      */
-    public function destroy(Request $request, $id) {
+    public function destroy(Request $request) {
         $class = static::getClass();
 
-        $item = $class::findOrFail($id);
+        $item = $class::findOrFail(static::getId());
 
         if($item->delete()) {
             return response()->true();
