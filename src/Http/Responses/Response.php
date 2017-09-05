@@ -2,6 +2,8 @@
 
 namespace DreamHack\SDK\Http\Responses;
 use Carbon\Carbon;
+use DreamHack\SDK\Contracts\Requestable;
+use DreamHack\SDK\Eloquent\Model;
 use Illuminate\Http\Response as IlluminateResponse;
 
 class Response extends IlluminateResponse {
@@ -35,47 +37,56 @@ class Response extends IlluminateResponse {
 		return function($row) use ($fields) {
 			$ret = [];
 			foreach($fields as $field => $castType) {
-				$value = $row->$field;
-                if($value === null) {
-                    $ret[$field] = $value;
+                $value = $row->$field;
+                if(class_exists($castType) && (is_subclass_of($castType, Model::class) || in_array(Requestable::class, class_implements($castType)))) {
+                    if($value === null ){
+                        continue;
+                    }
+                    $value = self::castCollectionSubsetIterator($castType::getFields())($value);
+                } else if(is_string($castType)) {
+                    if($value === null) {
+                        $ret[$field] = $value;   
+                        continue;
+                    }
+                    switch ($castType) {
+                        case 'int':
+                        case 'integer':
+                            $value = (int) $value;
+                            break;
+                        case 'real':
+                        case 'float':
+                        case 'double':
+                            $value = (float) $value;
+                            break;
+                        case 'uuid':
+                        case 'string':
+                            $value = (string) $value;
+                            break;
+                        case 'bool':
+                        case 'boolean':
+                            $value = (bool) $value;
+                            break;
+                        case 'collection':
+                            $value = new BaseCollection($value);
+                            break;
+                        case 'date':
+                            $value = static::asDate($value)->toW3cString();
+                            break;
+                        case 'datetime':
+                            $value = static::asDateTime($value)->toW3cString();
+                            break;
+                        case 'timestamp':
+                            $value = static::asTimestamp($value);
+                            break;
+                        case 'self':
+                            if($value) {
+                                $value = self::castCollectionSubsetIterator($fields)($value);
+                            }
+                            break;
+                    }
+                } else {
                     continue;
                 }
-				switch ($castType) {
-					case 'int':
-					case 'integer':
-						$value = (int) $value;
-						break;
-					case 'real':
-					case 'float':
-					case 'double':
-						$value = (float) $value;
-						break;
-					case 'uuid':
-					case 'string':
-						$value = (string) $value;
-						break;
-					case 'bool':
-					case 'boolean':
-						$value = (bool) $value;
-						break;
-					case 'collection':
-						$value = new BaseCollection($value);
-						break;
-					case 'date':
-						$value = static::asDate($value);
-						break;
-					case 'datetime':
-						$value = static::asDateTime($value);
-						break;
-					case 'timestamp':
-						$value = static::asTimestamp($value);
-						break;
-					case 'self':
-						if($value) {
-							$value = self::castCollectionSubsetIterator($fields)($value);
-						}
-						break;
-				}
 				$ret[$field] = $value;
 			}
 			return $ret;
@@ -166,11 +177,15 @@ class Response extends IlluminateResponse {
         // the database connection and use that format to create the Carbon object
         // that is returned back out to the developers after we convert it here.
         return Carbon::createFromFormat(
-            static::getDateFormat(), $value
+            static::getDateTimeFormat(), $value
         );
     }
 
     public static function getDateFormat() {
+        return 'Y-m-d';
+    }
+
+    public static function getDateTimeFormat() {
         return 'Y-m-d H:i:s';
     }
 
@@ -194,7 +209,7 @@ class Response extends IlluminateResponse {
     public static function fromDateTime($value)
     {
         return static::asDateTime($value)->format(
-            static::getDateFormat()
+            static::getDateTimeFormat()
         );
     }
 
