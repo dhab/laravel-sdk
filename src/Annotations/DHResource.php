@@ -15,7 +15,7 @@ class DHResource extends Resource {
     public function modifyCollection(EndpointCollection $endpoints, ReflectionClass $class)
     {
         $initial_value = $this->value;
-        $this->values['prefix'] = env('API_PREFIX', 'content').(!empty($initial_value)?'/'.$initial_value:'');
+        $this->values['prefix'] = env('API_PREFIX').(!empty($initial_value)?'/'.$initial_value:'');
         $this->values['value'] = ($this->values['version']?:'0')."/".$this->values['prefix'];
         $endpoints->push(new ResourceEndpoint([
             'reflection' => $class, 'name' => $this->value, 'names' => (array) $this->names,
