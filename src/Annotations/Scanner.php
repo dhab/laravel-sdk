@@ -125,7 +125,7 @@ class Scanner extends BaseRouteScanner {
                 return 1;
             } else if($lengthA > $lengthB) {
                 return -1;
-            } else if($lengthB > $lengthA) {
+            } else if($lengthA < $lengthB) {
                 return 1;
             } else {
                 return 0;
