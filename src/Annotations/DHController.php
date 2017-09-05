@@ -25,7 +25,7 @@ class DHController extends BaseController {
   public function prefixApiVersions(EndpointCollection $endpoints)
   {
         foreach ($endpoints->getAllPaths() as $path) {
-            $path->path = $this->trimPath((isset($path->version)?$path->version:'0')."/".env('API_PREFIX', 'content'), $path->path);
+            $path->path = $this->trimPath((isset($path->version)?$path->version:'0')."/".env('API_PREFIX'), $path->path);
         }
   }
 }
