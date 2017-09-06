@@ -2,14 +2,14 @@
 
 namespace DreamHack\SDK\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
 use Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
 use Auth;
 
-class SocialiteController extends Controller
+class SocialiteController extends BaseController
 {
     /*
     |--------------------------------------------------------------------------

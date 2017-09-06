@@ -8,6 +8,7 @@
         "source": "https://git.dreamhack.se/dhid/laravel-sdk"
     },
     "require": {
+        "laravel/framework": "5.4.*",
         "ramsey/uuid": "^3.3",
         "laravelcollective/annotations": "^5.4.0",
         "guzzlehttp/guzzle": "^6.2",

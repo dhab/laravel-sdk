@@ -3,7 +3,7 @@ namespace DreamHack\SDK\Tests;
 
 use Manifest;
 
-class BaseRAMLTest extends \TestCase
+trait BaseRAMLTest
 {
     /**
      * A basic test example.
