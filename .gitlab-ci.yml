@@ -13,5 +13,5 @@ variables:
 test:
   stage: test
   script:
-    - vendor/bin/phpcs --standard=PSR2 src/
+    - vendor/bin/phpcs --standard=PSR2 --report=source src/
     - vendor/bin/phpunit --coverage-text --colors=never

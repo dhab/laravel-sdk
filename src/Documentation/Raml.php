@@ -92,7 +92,7 @@ class Raml
         return $this->classesToSkip->has($class);
     }
 
-    function __construct(array $params = [], $skipClass = false)
+    public function __construct(array $params = [], $skipClass = false)
     {
         $this->params = array_merge($this->params, $params);
         if (is_array($skipClass)) {

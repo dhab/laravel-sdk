@@ -13,7 +13,7 @@ use Illuminate\Validation\Validator;
 
 class ValidatorFail extends Response
 {
-    function __construct(Validator $validator = null, $key = null)
+    public function __construct(Validator $validator = null, $key = null)
     {
         if (!$validator) {
             return parent::__construct();
