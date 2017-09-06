@@ -7,6 +7,7 @@ use DreamHack\SDK\Contracts\Requestable;
 use DreamHack\SDK\Eloquent\Model;
 use Illuminate\Http\Response as IlluminateResponse;
 use Illuminate\Support\Collection;
+use stdClass;
 
 class Response extends IlluminateResponse
 {
@@ -93,6 +94,11 @@ class Response extends IlluminateResponse
                         case 'self':
                             if ($value) {
                                 $value = self::castCollectionSubsetIterator($fields)($value);
+                            }
+                            break;
+                        case 'object':
+                            if (is_array($value) && empty($value)) {
+                                $value = new stdClass;
                             }
                             break;
                     }
