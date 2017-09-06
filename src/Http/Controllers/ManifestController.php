@@ -31,10 +31,10 @@ class ManifestController extends BaseController
     {
         $raml = Manifest::getRAMLManifest(static::class);
 
-        if ( isset($_GET['errors']) && $_GET['errors'] )
+        if (isset($_GET['errors']) && $_GET['errors']) {
             return $raml->errors();
+        }
 
         return new Responses\Raml($raml->toArray());
     }
-
 }

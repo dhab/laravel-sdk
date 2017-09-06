@@ -15,6 +15,6 @@ class Fake extends Facade
      */
     protected static function getFacadeAccessor()
     {
-		return \Faker\Generator::class;
+        return \Faker\Generator::class;
     }
 }

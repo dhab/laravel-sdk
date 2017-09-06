@@ -15,17 +15,18 @@ class ResponseServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot() {
-        Response::macro('bool', function(bool $value) {
+    public function boot()
+    {
+        Response::macro('bool', function (bool $value) {
             return new BooleanResponse($value);
         });
-        Response::macro('boolean', function(bool $value) {
+        Response::macro('boolean', function (bool $value) {
             return response()->bool($value);
         });
-        Response::macro('true', function() {
+        Response::macro('true', function () {
             return response()->bool(true);
         });
-        Response::macro('false', function() {
+        Response::macro('false', function () {
             return response()->bool(false);
         });
     }
@@ -33,5 +34,7 @@ class ResponseServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register() { }
+    public function register()
+    {
+    }
 }

@@ -1,6 +1,7 @@
 <?php
 namespace DreamHack\SDK\Http\Requests;
 
-class ModelRequest extends Request {
-	
+class ModelRequest extends Request
+{
+    
 }

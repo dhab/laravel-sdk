@@ -16,9 +16,10 @@ class ValidationServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot() {
+    public function boot()
+    {
 
-        foreach(\Gettext\Languages\Language::getAll() as $lang) {
+        foreach (\Gettext\Languages\Language::getAll() as $lang) {
             static::$languages[$lang->id] = $lang->name;
         }
         Validator::extend('language', function ($attribute, $value, $parameters, $validator) {
@@ -27,10 +28,10 @@ class ValidationServiceProvider extends ServiceProvider
         Validator::replacer('language', function ($message, $attribute, $rule, $parameters) {
             return "The ".$attribute." field must be a valid language.";
         });
-        Validator::extend('uuid', function($attribute, $value, $parameters, $validator) {
+        Validator::extend('uuid', function ($attribute, $value, $parameters, $validator) {
             try {
                 $uuid = Uuid::fromString($value);
-            } catch(Exception $e) {
+            } catch (Exception $e) {
                 return false;
             }
             return true;
@@ -43,5 +44,7 @@ class ValidationServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register() { }
+    public function register()
+    {
+    }
 }

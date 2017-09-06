@@ -1,6 +1,7 @@
 <?php
 
 namespace DreamHack\SDK\Annotations;
+
 use App;
 use Cache;
 use URL;
@@ -8,25 +9,25 @@ use DreamHack\SDK\Documentation\Raml;
 use Collective\Annotations\Routing\Annotations\Scanner as BaseRouteScanner;
 use Collective\Annotations\Routing\Annotations\ResourceEndpoint;
 
-
-function getLength($endpoint) {
+function getLength($endpoint)
+{
     $paths = [];
-    foreach($endpoint->getPaths() as $path) {
-        if($endpoint instanceof ResourceEndpoint) {
+    foreach ($endpoint->getPaths() as $path) {
+        if ($endpoint instanceof ResourceEndpoint) {
             $paths[] = $endpoint->getURIForPath($path);
         } else {
             $paths[] = $path->path;
         }
     }
     
-    usort($paths, function($a, $b) {
+    usort($paths, function ($a, $b) {
         return (strlen($a) > strlen($b)) ? -1 : 1;
     });
     $path = $paths[0]??'';
     
 
     $min_wildcards = 0;
-    $wildcards = array_reduce(array_map(function($item) {
+    $wildcards = array_reduce(array_map(function ($item) {
         return preg_match_all("/{\w+}/", $item);
     }, $paths), "min", PHP_INT_MAX);
     return [
@@ -35,15 +36,17 @@ function getLength($endpoint) {
     ];
 }
 
-class Scanner extends BaseRouteScanner {
+class Scanner extends BaseRouteScanner
+{
     private $cache_key = "manifest";
 
-    public function getManifest($skipClass = false) {
+    public function getManifest($skipClass = false)
+    {
         $manifest = false;
-        if(!App::environment('local', 'staging') && Cache::has($this->cache_key)) {
+        if (!App::environment('local', 'staging') && Cache::has($this->cache_key)) {
             $manifest = Cache::get($this->cache_key);
         }
-        if(!$manifest) {
+        if (!$manifest) {
             $manifest = [
                 "uuid" => env('API_UUID'),
                 "prefix" => env('API_PREFIX'),
@@ -51,19 +54,19 @@ class Scanner extends BaseRouteScanner {
             ];
             $endpoints = $this->getEndpointsInClasses($this->getReader());
             foreach ($endpoints as $endpoint) {
-                if($endpoint->reflection->name == $skipClass) {
+                if ($endpoint->reflection->name == $skipClass) {
                     continue;
                 }
-                foreach($endpoint->getPaths() as $path) {
-                    if(!isset($path->version)) {
+                foreach ($endpoint->getPaths() as $path) {
+                    if (!isset($path->version)) {
                         continue;
                     }
                     $version = $path->version;
                     $method = strtoupper($path->verb);
-                    if($endpoint instanceof ResourceEndpoint) {
+                    if ($endpoint instanceof ResourceEndpoint) {
                         $uriParts = explode('/', $endpoint->getURIForPath($path));
                     } else {
-                        if(empty($path->path)) {
+                        if (empty($path->path)) {
                             continue;
                         }
                         $uriParts = explode('/', $path->path);
@@ -77,15 +80,15 @@ class Scanner extends BaseRouteScanner {
                         "version" => $version,
                         "url" => $url
                     ];
-                    if(isset($endpoint->skipAuth) && $endpoint->skipAuth) {
+                    if (isset($endpoint->skipAuth) && $endpoint->skipAuth) {
                         $route['skipAuth'] = true;
                     }
-                    if($method == 'GET' && isset($endpoint->cacheable) && $endpoint->cacheable) {
+                    if ($method == 'GET' && isset($endpoint->cacheable) && $endpoint->cacheable) {
                         $route['cacheable'] = true;
                     }
                     $manifest['endpoints'][] = $route;
                     
-                    if($method == 'GET') {
+                    if ($method == 'GET') {
                         $route['method'] = 'HEAD';
                         $manifest['endpoints'][] = $route;
                     }
@@ -93,11 +96,12 @@ class Scanner extends BaseRouteScanner {
             }
             
             // Sort the endpoints by url-length, longest first.
-            usort($manifest['endpoints'], function($a, $b) {
+            usort($manifest['endpoints'], function ($a, $b) {
                 return (strlen($a['url']) > strlen($b['url'])) ? -1 : 1;
             });
-            if(!App::environment('local', 'staging'))
+            if (!App::environment('local', 'staging')) {
                 Cache::put($this->cache_key, $manifest, 5);
+            }
         }
         return $manifest;
     }
@@ -112,20 +116,20 @@ class Scanner extends BaseRouteScanner {
         $output = '';
         $endpointsCollection = $this->getEndpointsInClasses($this->getReader());
         $endpoints = [];
-        foreach($endpointsCollection as $endpoint) {
+        foreach ($endpointsCollection as $endpoint) {
             $endpoints[] = $endpoint;
         }
         $unsortedEndpoints = $endpoints;
-        usort($endpoints, function($a, $b) {
+        usort($endpoints, function ($a, $b) {
             list($lengthA, $wildcardsA) = getLength($a);
             list($lengthB, $wildcardsB) = getLength($b);
-            if($wildcardsA < $wildcardsB) {
+            if ($wildcardsA < $wildcardsB) {
                 return -1;
-            } else if($wildcardsA > $wildcardsB) {
+            } elseif ($wildcardsA > $wildcardsB) {
                 return 1;
-            } else if($lengthA > $lengthB) {
+            } elseif ($lengthA > $lengthB) {
                 return -1;
-            } else if($lengthA < $lengthB) {
+            } elseif ($lengthA < $lengthB) {
                 return 1;
             } else {
                 return 0;
@@ -138,14 +142,16 @@ class Scanner extends BaseRouteScanner {
         return trim($output);
     }
 
-    public function getRAMLManifest($skipClass = false) {
+    public function getRAMLManifest($skipClass = false)
+    {
 
         $version = env('VERSION', 'dev');
-        if ( $version == 'dev' ) {
+        if ($version == 'dev') {
             // Try to get the git tag/version
             $v = exec('git describe  --tags');
-            if ( strstr($v, 'fatal:') === false )
+            if (strstr($v, 'fatal:') === false) {
                 $version = $v;
+            }
         }
 
         $raml = new Raml([
@@ -168,5 +174,4 @@ class Scanner extends BaseRouteScanner {
 
         return $raml;
     }
-
 }

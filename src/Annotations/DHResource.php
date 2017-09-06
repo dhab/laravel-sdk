@@ -8,7 +8,8 @@ use ReflectionClass;
 /**
  * @Annotation
  */
-class DHResource extends Resource {
+class DHResource extends Resource
+{
     /**
      * {@inheritdoc}
      */
@@ -44,8 +45,8 @@ class DHResource extends Resource {
     public function prefixApiVersions(EndpointCollection $endpoints)
     {
         foreach ($endpoints as $endpoint) {
-            foreach($endpoint->getPaths() as $path) {
-                if(!$endpoint instanceof ResourceEndpoint) {
+            foreach ($endpoint->getPaths() as $path) {
+                if (!$endpoint instanceof ResourceEndpoint) {
                     $path->path = $this->trimPath((isset($path->version)?$path->version:$this->values['version'])."/".$this->values['prefix'], $path->path);
                 } else {
                     $path->version = $this->values['version'];

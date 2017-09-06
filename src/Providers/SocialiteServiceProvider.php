@@ -17,7 +17,7 @@ class SocialiteServiceProvider extends ServiceProvider
         // Register database migrations
         $this->loadMigrationsFrom(__DIR__.'/../../migrations/socialite');
 
-        // Register routes 
+        // Register routes
         $this->loadRoutesFrom(__DIR__.'/../../routes/socialite.php');
 
         // Register views

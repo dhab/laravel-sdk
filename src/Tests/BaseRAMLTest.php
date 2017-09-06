@@ -3,7 +3,8 @@ namespace DreamHack\SDK\Tests;
 
 use Manifest;
 
-class BaseRAMLTest extends \TestCase {
+trait BaseRAMLTest
+{
     /**
      * A basic test example.
      *
@@ -13,13 +14,13 @@ class BaseRAMLTest extends \TestCase {
     {
         $resp = Manifest::getRAMLManifest(\DreamHack\SDK\Http\Controllers\ManifestController::class);
 
-        foreach($resp->errors() as $error => $desc) {
+        foreach ($resp->errors() as $error => $desc) {
             // The only accepted error is "db exception"
-            $this->assertContains('db exception',$error, $desc);
+            $this->assertContains('db exception', $error, $desc);
         }
-        if($resp->hasWarnings()) {
+        if ($resp->hasWarnings()) {
             $this->markTestIncomplete(
-              'This test has not been implemented yet.'
+                'This test has not been implemented yet.'
             );
         }
     }

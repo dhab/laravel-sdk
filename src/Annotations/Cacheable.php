@@ -8,13 +8,14 @@ use ReflectionMethod;
 /**
  * @Annotation
  */
-class Cacheable extends Annotation {
+class Cacheable extends Annotation
+{
 
   /**
    * {@inheritdoc}
    */
-  public function modify(MethodEndpoint $endpoint, ReflectionMethod $method)
-  {
-    $endpoint->cacheable = true;
-  }
+    public function modify(MethodEndpoint $endpoint, ReflectionMethod $method)
+    {
+        $endpoint->cacheable = true;
+    }
 }

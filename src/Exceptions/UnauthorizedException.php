@@ -19,7 +19,8 @@ class UnauthorizedException extends Exception
         parent::__construct('Unauthorized');
     }
 
-    public function getStatusCode() {
+    public function getStatusCode()
+    {
         return 401;
     }
 }

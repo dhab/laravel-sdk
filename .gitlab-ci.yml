@@ -1,0 +1,17 @@
+stages:
+  - test
+
+image: deriel/laravel:latest
+
+before_script:
+  - composer install --no-suggest --no-progress
+
+variables:
+  COMPOSER_CACHE_DIR: /cache/composer.cache
+  NPM_CONFIG_LOGLEVEL: warn
+
+test:
+  stage: test
+  script:
+    - vendor/bin/phpcs -n --standard=PSR2 --report-full --report-source --report-summary src/
+    - vendor/bin/phpunit --coverage-text --colors=never

@@ -7,7 +7,8 @@ use Collective\Annotations\Routing\Annotations\MethodEndpoint;
 use ReflectionMethod;
 use ReflectionClass;
 
-class MiddlewareAnnotation extends Annotation {
+class MiddlewareAnnotation extends Annotation
+{
 
     protected $middleware = [];
 
@@ -38,5 +39,4 @@ class MiddlewareAnnotation extends Annotation {
             }
         }
     }
-
 }

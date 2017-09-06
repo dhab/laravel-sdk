@@ -2,14 +2,14 @@
 
 namespace DreamHack\SDK\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
 use Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
 use Auth;
 
-class SocialiteController extends Controller
+class SocialiteController extends BaseController
 {
     /*
     |--------------------------------------------------------------------------
@@ -89,19 +89,19 @@ class SocialiteController extends Controller
      */
     private function findOrCreateUser($dhidUser)
     {
-        $userModel = config('services.dhid.model','\App\User');
+        $userModel = config('services.dhid.model', '\App\User');
 
         if (!$user = $userModel::where('dhid', $dhidUser->id)->first()) { // Find based on UUID
             if (!$user = $userModel::where('email', $dhidUser->email)->first()) { // Find based on email
-                $user = New $userModel([ // Create a new user
+                $user = new $userModel([ // Create a new user
                     'password' => '',
                 ]);
             }
         }
 
         // Update attributes
-        $user->name = 
-            $dhidUser->name . 
+        $user->name =
+            $dhidUser->name .
             ($dhidUser->user['name']?' ('.$dhidUser->user['name'].')':'');
         $user->email = $dhidUser->email;
         $user->dhid = $dhidUser->id;

@@ -13,18 +13,22 @@ class AuthServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot() { }
+    public function boot()
+    {
+    }
 
     /**
      * Register any application services.
      */
-    public function register() {
+    public function register()
+    {
         $this->app->singleton(User::class, function ($app) {
             return new User($app['request']);
         });
     }
 
-    public function provides() {
+    public function provides()
+    {
         return [
             User::class,
         ];

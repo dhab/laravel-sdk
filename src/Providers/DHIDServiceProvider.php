@@ -13,14 +13,15 @@ class DHIDServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot() {
-
+    public function boot()
+    {
     }
 
     /**
      * Register any application services.
      */
-    public function register() {
+    public function register()
+    {
         $this->app->singleton(DHID::class, function ($app) {
             $config = [
                 'base_uri' => env('API_BASE_URL', 'https://api.dreamhack.com')
@@ -28,12 +29,13 @@ class DHIDServiceProvider extends ServiceProvider
             return new DHID($config);
         });
         $client = $this->app->make(DHID::class);
-        $this->app->terminating(function() use ($client) {
+        $this->app->terminating(function () use ($client) {
             $client->sendUpdates();
         });
     }
 
-    public function provides() {
+    public function provides()
+    {
         return [
             DHID::class
         ];

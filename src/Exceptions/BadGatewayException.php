@@ -19,7 +19,8 @@ class BadGatewayException extends Exception
         parent::__construct('Bad Gateway.');
     }
 
-    public function getStatusCode() {
+    public function getStatusCode()
+    {
         return 502;
     }
 }

@@ -41,12 +41,13 @@ class ResourceEndpoint extends BaseEndpoint
      * Get full URI for a path for documentation & service discovery
      * @return string
      */
-    public function getURIForPath($path) {
-        if(!in_array($path, $this->paths)) {
+    public function getURIForPath($path)
+    {
+        if (!in_array($path, $this->paths)) {
             throw new \Exception("Tried to get URI for non-member path");
         }
         $uri = $this->name."/";
-        switch($path->method) {
+        switch ($path->method) {
             case "create":
                 $uri .= "create";
                 break;
@@ -58,7 +59,7 @@ class ResourceEndpoint extends BaseEndpoint
             case "edit":
                 $uri .= "{id}/edit";
         }
-        if($this->isCustomPath($path)){
+        if ($this->isCustomPath($path)) {
             $uri .= $path->path;
         }
         return $uri;
@@ -72,10 +73,14 @@ class ResourceEndpoint extends BaseEndpoint
     protected function buildPaths()
     {
         foreach ($this->getIncludedMethods() as $method) {
-            if($this->isCustomMethod($method)) {
+            if ($this->isCustomMethod($method)) {
                 $path = new Path(
-                    $this->customVerbs[$method], "", $method,
-                    $this->as.".".$this->getNameOf($method), [], []
+                    $this->customVerbs[$method],
+                    "",
+                    $method,
+                    $this->as.".".$this->getNameOf($method),
+                    [],
+                    []
                 );
                 $path->method = $method;
                 $this->paths[] = $path;
@@ -85,17 +90,21 @@ class ResourceEndpoint extends BaseEndpoint
         }
     }
 
-    protected function isCustomMethod($method) {
+    protected function isCustomMethod($method)
+    {
         return in_array($method, $this->customMethods);
     }
-    protected function isCustomPath($path) {
+    protected function isCustomPath($path)
+    {
         return !$path instanceof ResourcePath;
     }
 
-    protected function getNameOf($method) {
+    protected function getNameOf($method)
+    {
         return $method;
     }
-    protected function getVerbOf($method) {
+    protected function getVerbOf($method)
+    {
         return $this->customVerbs[$method]??"GET";
     }
 
@@ -109,7 +118,7 @@ class ResourceEndpoint extends BaseEndpoint
         $routes = [];
 
         foreach ($this->paths as $path) {
-            if($this->isCustomPath($path)) {
+            if ($this->isCustomPath($path)) {
                 $routes[] = sprintf(
                     $this->getCustomTemplate(),
                     $path->verb,
@@ -122,11 +131,15 @@ class ResourceEndpoint extends BaseEndpoint
                 );
             } else {
                 $routes[] = sprintf(
-                    $this->getTemplate(), 'Resource: '.$this->name.'@'.$path->method,
+                    $this->getTemplate(),
+                    'Resource: '.$this->name.'@'.$path->method,
                     $this->implodeArray($this->getMiddleware($path)),
-                    var_export($path->path, true), $this->implodeArray($path->where),
-                    var_export($path->domain, true), var_export($this->name, true),
-                    var_export($this->reflection->name, true), $this->implodeArray([$path->method]),
+                    var_export($path->path, true),
+                    $this->implodeArray($path->where),
+                    var_export($path->domain, true),
+                    var_export($this->name, true),
+                    var_export($this->reflection->name, true),
+                    $this->implodeArray([$path->method]),
                     $this->implodeArray($this->getNames($path))
                 );
             }
@@ -135,7 +148,8 @@ class ResourceEndpoint extends BaseEndpoint
         return implode(PHP_EOL.PHP_EOL, $routes);
     }
 
-    protected function getCustomMiddleware($method) {
+    protected function getCustomMiddleware($method)
+    {
         $classMiddleware = Collection::make($this->classMiddleware)->filter(function ($m) use ($method) {
             return $this->middlewareAppliesToMethod($method, $m);
         })

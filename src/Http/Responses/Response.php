@@ -1,51 +1,63 @@
 <?php
 
 namespace DreamHack\SDK\Http\Responses;
+
 use Carbon\Carbon;
 use DreamHack\SDK\Contracts\Requestable;
 use DreamHack\SDK\Eloquent\Model;
 use Illuminate\Http\Response as IlluminateResponse;
+use Illuminate\Support\Collection;
 
-class Response extends IlluminateResponse {
+class Response extends IlluminateResponse
+{
 
-    public static function getDefaultStatusCode() {
+    public static function getDefaultStatusCode()
+    {
         return 200;
     }
 
-    public static function getBaseHeaders() {
+    public static function getBaseHeaders()
+    {
         return [
             "Content-Type" => "application/json",
         ];
     }
 
-	public function __construct($content, $status = false, $headers = false) {
+    public function __construct($content, $status = false, $headers = false)
+    {
         parent::__construct($content, $status?:self::getDefaultStatusCode(), $headers?array_merge(self::getBaseHeaders(), $headers):self::getBaseHeaders());
-	}
+    }
 
 
-	protected function collectionSubset($collection, $fields) {
-		return $collection->map(function($row) use ($fields) {
-			$ret = [];
-			foreach($fields as $field) {
-				$ret[$field] = $row->$field;
-			}
-			return $ret;
-		});
-	}
+    protected function collectionSubset($collection, $fields)
+    {
+        return $collection->map(function ($row) use ($fields) {
+            $ret = [];
+            foreach ($fields as $field) {
+                $ret[$field] = $row->$field;
+            }
+            return $ret;
+        });
+    }
 
-	protected static function castCollectionSubsetIterator($fields) {
-		return function($row) use ($fields) {
-			$ret = [];
-			foreach($fields as $field => $castType) {
+    protected static function castCollectionSubsetIterator($fields)
+    {
+        return function ($row) use ($fields) {
+            $ret = [];
+            foreach ($fields as $field => $castType) {
                 $value = $row->$field;
-                if(class_exists($castType) && (is_subclass_of($castType, Model::class) || in_array(Requestable::class, class_implements($castType)))) {
-                    if($value === null ){
+                if (class_exists($castType) && (is_subclass_of($castType, Model::class) || in_array(Requestable::class, class_implements($castType)))) {
+                    if ($value === null) {
                         continue;
                     }
-                    $value = self::castCollectionSubsetIterator($castType::getFields())($value);
-                } else if(is_string($castType)) {
-                    if($value === null) {
-                        $ret[$field] = $value;   
+                    if ($value instanceof Collection) {
+                        $value = self::castCollectionSubset($value, $castType::getFields(), $castType::getKeyByField(), $castType::getGroupByField());
+                    } else {
+                        $value = self::castCollectionSubsetIterator($castType::getFields())($value);
+                    }
+                } elseif (is_string($castType)) {
+                    if ($value === null) {
+                        $ret[$field] = $value;
                         continue;
                     }
                     switch ($castType) {
@@ -79,7 +91,7 @@ class Response extends IlluminateResponse {
                             $value = static::asTimestamp($value);
                             break;
                         case 'self':
-                            if($value) {
+                            if ($value) {
                                 $value = self::castCollectionSubsetIterator($fields)($value);
                             }
                             break;
@@ -87,30 +99,30 @@ class Response extends IlluminateResponse {
                 } else {
                     continue;
                 }
-				$ret[$field] = $value;
-			}
-			return $ret;
-		};
-	}
+                $ret[$field] = $value;
+            }
+            return $ret;
+        };
+    }
 
-	protected function castCollectionSubset($collection, $fields, $idKey = false, $groupBy = false) {
-        if($groupBy) {
+    protected static function castCollectionSubset($collection, $fields, $idKey = false, $groupBy = false)
+    {
+        if ($groupBy) {
             $ret = collect([]);
             $collection = $collection->groupBy($groupBy)->all();
-            foreach($collection as $key => $group) {
-                if($idKey) {
+            foreach ($collection as $key => $group) {
+                if ($idKey) {
                     $group = $group->keyBy($idKey);
                 }
                 $ret[$key] = $group->map(self::castCollectionSubsetIterator($fields));
             }
-            // dd($ret);
             return $ret;
         }
-        if($idKey) {
+        if ($idKey) {
             $collection = $collection->keyBy($idKey);
         }
-		return $collection->map(self::castCollectionSubsetIterator($fields));
-	}
+        return $collection->map(static::castCollectionSubsetIterator($fields));
+    }
 
     /**
      * Decode the given JSON back into an array or object.
@@ -155,7 +167,8 @@ class Response extends IlluminateResponse {
          // when checking the field. We will just return the DateTime right away.
         if ($value instanceof DateTimeInterface) {
             return new Carbon(
-                $value->format('Y-m-d H:i:s.u'), $value->getTimezone()
+                $value->format('Y-m-d H:i:s.u'),
+                $value->getTimezone()
             );
         }
 
@@ -177,15 +190,18 @@ class Response extends IlluminateResponse {
         // the database connection and use that format to create the Carbon object
         // that is returned back out to the developers after we convert it here.
         return Carbon::createFromFormat(
-            static::getDateTimeFormat(), $value
+            static::getDateTimeFormat(),
+            $value
         );
     }
 
-    public static function getDateFormat() {
+    public static function getDateFormat()
+    {
         return 'Y-m-d';
     }
 
-    public static function getDateTimeFormat() {
+    public static function getDateTimeFormat()
+    {
         return 'Y-m-d H:i:s';
     }
 
