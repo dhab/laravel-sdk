@@ -1,14 +1,17 @@
 <?php
 
 namespace DreamHack\SDK\Eloquent;
+
 use Illuminate\Database\Eloquent\Model as BaseModel;
 
-class Model extends BaseModel {
+class Model extends BaseModel
+{
     protected $orderBy;
     protected $orderDirection = 'ASC';
 
-    public static function getTypeName() {
-        return array_slice(explode('\\',static::class), -1)[0];
+    public static function getTypeName()
+    {
+        return array_slice(explode('\\', static::class), -1)[0];
     }
 
     public function scopeOrdered($query)
@@ -17,11 +20,12 @@ class Model extends BaseModel {
     }
 
 
-    public static function getKeyByField() {
+    public static function getKeyByField()
+    {
         return "id";
     }
-    public static function getGroupByField() {
+    public static function getGroupByField()
+    {
         return false;
     }
-
 }

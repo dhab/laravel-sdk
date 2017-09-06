@@ -3,6 +3,7 @@
 namespace DreamHack\SDK\Annotations;
 
 use Collective\Annotations\Routing\Annotations\ResourcePath as BasePath;
+
 class ResourcePath extends BasePath
 {
     /**

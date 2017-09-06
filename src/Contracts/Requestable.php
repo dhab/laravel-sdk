@@ -2,7 +2,8 @@
 
 namespace DreamHack\SDK\Contracts;
 
-interface Requestable {
+interface Requestable
+{
     /**
      * Formatting rules for responses of this Model
      * @return array

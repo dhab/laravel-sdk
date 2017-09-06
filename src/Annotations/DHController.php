@@ -8,24 +8,25 @@ use ReflectionClass;
 /**
  * @Annotation
  */
-class DHController extends BaseController {
+class DHController extends BaseController
+{
     /**
      * {@inheritdoc}
      */
     public function modifyCollection(EndpointCollection $endpoints, ReflectionClass $class)
     {
-    	parent::modifyCollection($endpoints, $class);
+        parent::modifyCollection($endpoints, $class);
 
-    	$this->prefixApiVersions($endpoints);
+        $this->prefixApiVersions($endpoints);
     }
 
   /**
    * {@inheritdoc}
    */
-  public function prefixApiVersions(EndpointCollection $endpoints)
-  {
+    public function prefixApiVersions(EndpointCollection $endpoints)
+    {
         foreach ($endpoints->getAllPaths() as $path) {
             $path->path = $this->trimPath((isset($path->version)?$path->version:'0')."/".env('API_PREFIX'), $path->path);
         }
-  }
+    }
 }

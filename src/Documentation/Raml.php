@@ -6,9 +6,10 @@ use DB;
 use DreamHack\SDK\Facades\Fake;
 
 /**
- * 
+ *
  **/
-class Raml {
+class Raml
+{
     private $errors = [];
     private $params = [
         'title' => '',
@@ -86,23 +87,26 @@ class Raml {
         ]
     ];
     private $classesToSkip;
-    private function shouldSkip($class) {
+    private function shouldSkip($class)
+    {
         return $this->classesToSkip->has($class);
     }
 
-    function __construct(array $params = [], $skipClass = false) {
+    function __construct(array $params = [], $skipClass = false)
+    {
         $this->params = array_merge($this->params, $params);
-        if(is_array($skipClass)) {
+        if (is_array($skipClass)) {
             $this->classesToSkip = collect($skipClass);
         } else {
             $this->classesToSkip = collect([$skipClass]);
         }
     }
 
-    public function addEndpoints($endpoints) {
+    public function addEndpoints($endpoints)
+    {
         $result = [];
-        foreach( $endpoints as $key => $endpoint ) {
-            if($this->shouldSkip($endpoint->reflection->name)) {
+        foreach ($endpoints as $key => $endpoint) {
+            if ($this->shouldSkip($endpoint->reflection->name)) {
                 continue;
             }
             $doc = $endpoint->reflection->getMethod($endpoint->method)->getDocComment();
@@ -111,40 +115,41 @@ class Raml {
 
             $responses = [];
             $permissions = [];
-            foreach($doc as $line) {
+            foreach ($doc as $line) {
                 $line = preg_split('/\s+/', trim($line), 3);
 
-                switch(array_shift($line)) {
-                case 'return':
-                    $code = 200;
-                    if ( is_numeric($line[0]) ) {
-                        $code = array_shift($line);
-                    }
-                    if ( !$type = $this->ramlType($line[0]) )
-                        continue 2;
+                switch (array_shift($line)) {
+                    case 'return':
+                        $code = 200;
+                        if (is_numeric($line[0])) {
+                            $code = array_shift($line);
+                        }
+                        if (!$type = $this->ramlType($line[0])) {
+                            continue 2;
+                        }
 
-                    if ( isset($raml['types'][$type['name']]['schema']) ) {
-                        $body = [
+                        if (isset($raml['types'][$type['name']]['schema'])) {
+                            $body = [
                             $raml['types'][$type['name']]['schema'] => $type['definition']
-                        ];
-                    }
+                            ];
+                        }
 
-                    $responses[$code] = [
+                        $responses[$code] = [
                         'description' => $type['description'],
                         'body' => $type['definition']
-                    ];
+                        ];
 
-                    break;
+                        break;
                 }
             }
-            if ( !$responses ) { // Enpoint has no documented returns, just skip it
-                foreach($endpoint->paths as $path) {
+            if (!$responses) { // Enpoint has no documented returns, just skip it
+                foreach ($endpoint->paths as $path) {
                     $this->errors[$path->verb . ' ' . $path->path] = 'Documentation is missing';
                 }
                 continue;
             }
 
-            if ( !isset($endpoint->skipAuth) || !$endpoint->skipAuth ) {
+            if (!isset($endpoint->skipAuth) || !$endpoint->skipAuth) {
                 $responses[401] = [
                     'description' => 'No credentials are provided, or the provided credentials are refused.',
                     'body' => [
@@ -154,16 +159,17 @@ class Raml {
                 $permissions[] = " * Requires authenticated user";
             }
 
-            if ( !$permissions ) 
+            if (!$permissions) {
                 $permissions[] = '_Anonymous access is allowed_';
+            }
 
-            foreach($endpoint->paths as $path) {
+            foreach ($endpoint->paths as $path) {
                 $subTree = [
                     $path->verb => [
-                        'description' => 
+                        'description' =>
                             trim($doc[0] ?? 'Unknown')."\n\n".
                             "__Permissions__\n\n".
-                            implode("\n",$permissions),
+                            implode("\n", $permissions),
                         //'queryParameters' => [
                             //'$size' => [
                                 //'type' => 'integer',
@@ -174,7 +180,7 @@ class Raml {
                         //],
                     ]
                 ];
-                if ( $responses ) {
+                if ($responses) {
                     $subTree[$path->verb]['responses'] = $responses;
                 }
 
@@ -189,33 +195,35 @@ class Raml {
     
         // Fix the dataset that gets borked by array_merge_recursive
         $clean = function ($row, $allow_combine = false) use (&$clean) {
-            if ( is_array($row) ) {
-                foreach($row as $key => $line) {
-                    switch($key) {
-                    case 'type':
-                        // Remove all duplicates that is crated by array_merge_recursive
-                        if ( is_array($line) )
-                            $row[$key] = reset($line);
-                        break;
-                    default:
-                        $combine = $allow_combine;
-                        // Stop combining if we reached a http verb
-                        if ( !is_array($line) || array_intersect(['get','post','put','delete'],array_keys($line)) ){
-                            $combine = false;
-                        }
-
-                        // Clean/combine all childs
-                        $row[$key] = $lines = $clean($line, $combine );
-
-                        if ( $combine ) {
-                            // Do the combine of paths
-                            if ( is_numeric(trim($key, '/')) || (is_array($lines)) ) {
-                                unset($row[$key]);
-                                foreach( $lines as $key2 => $lines2 )
-                                    $row[$key.'/'.trim($key2,'/')] = $lines2;
+            if (is_array($row)) {
+                foreach ($row as $key => $line) {
+                    switch ($key) {
+                        case 'type':
+                            // Remove all duplicates that is crated by array_merge_recursive
+                            if (is_array($line)) {
+                                $row[$key] = reset($line);
                             }
-                        }
-                        break;
+                            break;
+                        default:
+                            $combine = $allow_combine;
+                            // Stop combining if we reached a http verb
+                            if (!is_array($line) || array_intersect(['get','post','put','delete'], array_keys($line))) {
+                                $combine = false;
+                            }
+
+                            // Clean/combine all childs
+                            $row[$key] = $lines = $clean($line, $combine );
+
+                            if ($combine) {
+                                // Do the combine of paths
+                                if (is_numeric(trim($key, '/')) || (is_array($lines))) {
+                                    unset($row[$key]);
+                                    foreach ($lines as $key2 => $lines2) {
+                                        $row[$key.'/'.trim($key2, '/')] = $lines2;
+                                    }
+                                }
+                            }
+                            break;
                     }
                 }
                 ksort($row);
@@ -229,46 +237,52 @@ class Raml {
     }
 
 
-    public function toArray() {
+    public function toArray()
+    {
         $this->params['types'] = array_map(
-            function($data) {unset($data['name']);return $data;}, 
+            function ($data) {
+                unset($data['name']);
+                return $data;
+            },
             $this->params['types']
         );
         return $this->params + $this->endpoints;
     }
 
-    public function errors() {
+    public function errors()
+    {
         return $this->errors;
     }
 
-    private function ramlType($line, $namespace = '') {
+    private function ramlType($line, $namespace = '')
+    {
         $line = preg_split('/\s+/', trim($line), 2);
         $is_array = strstr($line[0], '[]') !== false;
         $t = trim($line[0], '[]\\');
 
-        switch($t) {
-        case 'string':
-        case 'boolean':
-        case 'integer':
-        case 'float':
-        case 'null':
-        case 'object':
-        case 'array':
-            $d = 'Basic php type: '.$t;
-            break;
-        default:
-            $typedef = $this->ramlDefine($t, $namespace);
-            if (!$typedef) {
-                return false;
-            }
-            $line[0] = $typedef['name'];
-            $d = $typedef['description'];
-            $t = $typedef['name'];
+        switch ($t) {
+            case 'string':
+            case 'boolean':
+            case 'integer':
+            case 'float':
+            case 'null':
+            case 'object':
+            case 'array':
+                $d = 'Basic php type: '.$t;
+                break;
+            default:
+                $typedef = $this->ramlDefine($t, $namespace);
+                if (!$typedef) {
+                    return false;
+                }
+                $line[0] = $typedef['name'];
+                $d = $typedef['description'];
+                $t = $typedef['name'];
 
-            break;
+                break;
         }
         
-        if ( $is_array ) {
+        if ($is_array) {
             $body = [
                 'type' => 'array',
                 'items' => $t
@@ -286,17 +300,18 @@ class Raml {
         ];
     }
 
-    private function ramlDefine($class, $namespace = '') {
-        if ( $class == "Illuminate\Http\Response" ) {
+    private function ramlDefine($class, $namespace = '')
+    {
+        if ($class == "Illuminate\Http\Response") {
             return false;
         }
-        if ( isset($this->params['types'][$class]) ) {
+        if (isset($this->params['types'][$class])) {
             return $this->params['types'][$class];
         }
-        if ( isset($this->params['types'][$namespace.'\\'.$class]) ) {
+        if (isset($this->params['types'][$namespace.'\\'.$class])) {
             return $this->params['types'][$namespace.'\\'.$class];
         }
-        $class = trim($class,'\\');
+        $class = trim($class, '\\');
         try {
             $reflection = new \ReflectionClass($class);
         } catch (\Exception $ex) {
@@ -319,12 +334,12 @@ class Raml {
             'description' => trim($doc[0]),
         ];
 
-        if ( $reflection->isSubclassOf(\Illuminate\Database\Eloquent\Model::class) ) {
+        if ($reflection->isSubclassOf(\Illuminate\Database\Eloquent\Model::class)) {
             $instance = $reflection->newInstance();
 
             try {
                 $attributes = self::getAllColumnsNamesFromTable($instance->getTable());
-                foreach($attributes as $name => $t) {
+                foreach ($attributes as $name => $t) {
                     $type['properties'] = $type['properties'] ?? [];
                     $type['properties'][$name] = $this->dbTypeToType($t['type']) + [
                         'description' => 'Database type is '.DB::connection()->getConfig('driver').'/'.$t['type'],
@@ -338,70 +353,71 @@ class Raml {
             try {
                 $type['example'] = $instance->fake();
 
-                if ( isset($type['properties']['created_at']) ) {
+                if (isset($type['properties']['created_at'])) {
                     $dates = [Fake::dateTime(), Fake::dateTime(), Fake::dateTime()];
                     sort($dates);
 
                     $type['example']['created_at'] = $dates[0];
                     $type['example']['updated_at'] = $dates[1];
-                    //if ( isset($type['properties']['deleted_at']) ) 
+                    //if ( isset($type['properties']['deleted_at']) )
                         //$type['example']['deleted_at'] = Fake::randomElement([$dates[2], null]);
                 }
             } catch (\Exception $ex) {
-            
             }
 
             $this->params['types'][$class] = $type;
             return $type;
         }
-        if ( $reflection->isSubclassOf(\DreamHack\SDK\Http\Responses\Response::class) ) {
+        if ($reflection->isSubclassOf(\DreamHack\SDK\Http\Responses\Response::class)) {
             $instance = $reflection->newInstance();
-            if ( isset($instance->mime) )
+            if (isset($instance->mime)) {
                 $type['schema'] = $instance->mime;
+            }
     
-            foreach($doc as $line) {
+            foreach ($doc as $line) {
                 $line = preg_split('/\s/', trim($line), 2);
-                switch($line[0]) {
-                case 'example':
-                    $example = $example ?? [];
-                    $example[] = $line[1];
-                    break;
-                case 'property':
-                    $line = preg_split('/\s+/', trim($line[1]), 3);
-                    $is_array = strstr($line[0], '[]') !== false;
-                    $is_optional = strstr($line[1], '?') !== false;
-                    $t = trim($line[0], '[]');
+                switch ($line[0]) {
+                    case 'example':
+                        $example = $example ?? [];
+                        $example[] = $line[1];
+                        break;
+                    case 'property':
+                        $line = preg_split('/\s+/', trim($line[1]), 3);
+                        $is_array = strstr($line[0], '[]') !== false;
+                        $is_optional = strstr($line[1], '?') !== false;
+                        $t = trim($line[0], '[]');
 
 
-                    $name = trim($line[1], '$?');
-                    $type['properties'] = $type['properties'] ?? [];
-                    $typedef = $this->ramlType($t, $reflection->getNamespaceName());
+                        $name = trim($line[1], '$?');
+                        $type['properties'] = $type['properties'] ?? [];
+                        $typedef = $this->ramlType($t, $reflection->getNamespaceName());
 
-                    if ( $is_array ) {
-                        $type['properties'][$name] = [
+                        if ($is_array) {
+                            $type['properties'][$name] = [
                             'type' => 'array',
                             'items' => $typedef['name'],
                             'required' => !$is_optional,
-                        ];
-                    } else {
-                        $type['properties'][$name] = [
+                            ];
+                        } else {
+                            $type['properties'][$name] = [
                             'type' => $typedef['name'],
                             'required' => !$is_optional,
-                        ];
-                    }
-                    //$type['properties'][$name] = [
+                            ];
+                        }
+                        //$type['properties'][$name] = [
                         //'type' => $typedef['name'],
                         //'required' => !$is_optional,
-                    //];
-                    if ( isset($line[2]) ) 
-                        $type['properties'][$name]['description'] = $line[2];
-                    break;
+                        //];
+                        if (isset($line[2])) {
+                            $type['properties'][$name]['description'] = $line[2];
+                        }
+                        break;
                 }
             }
 
-            if ( isset($example) ) {
-                $type['example'] = implode("\n",$example);
-            } elseif ( is_callable([$instance, 'fake']) ) {
+            if (isset($example)) {
+                $type['example'] = implode("\n", $example);
+            } elseif (is_callable([$instance, 'fake'])) {
                 $type['example'] = $instance->fake();
             }
 
@@ -420,14 +436,15 @@ class Raml {
                 //$type['properties'][$prop->getName()] = [
                     //'type' => 'unknown',
                     //'description' => $prop->getName(),
-                //];    
+                //];
             //}
         //}
         $this->errors['no match '.$class] = 'Type does not match any enabled type';
         return false;
     }
 
-    private function dbTypeToType( $type ) {
+    private function dbTypeToType($type)
+    {
         $dbtype = explode('(', $type, 2);
 
         /**
@@ -446,60 +463,63 @@ class Raml {
          * any
          */
 
-        switch($dbtype[0]) {
-        case 'char':
-        case 'varchar':
-        case 'tinytext':
-        case 'mediumtext':
-        case 'longtext':
-        case 'text':
-        case 'enum':
-            if ( isset($dbtype[1]) )
-                return [
+        switch ($dbtype[0]) {
+            case 'char':
+            case 'varchar':
+            case 'tinytext':
+            case 'mediumtext':
+            case 'longtext':
+            case 'text':
+            case 'enum':
+                if (isset($dbtype[1])) {
+                    return;
+                } [
                     'type' => 'string',
                     'maxLength' => intval($dbtype[1]),
                 ];
 
-            return ['type' => 'string'];
-        case 'tinyint':
-        case 'smallint':
-        case 'mediumint':
-        case 'int':
-        case 'integer':
-        case 'bigint':
-        case 'decimal':
-        case 'dec':
-        case 'float':
-        case 'double':
-        case 'year':
-            if ( isset($dbtype[1]) )
-                return [
+                return ['type' => 'string'];
+            case 'tinyint':
+            case 'smallint':
+            case 'mediumint':
+            case 'int':
+            case 'integer':
+            case 'bigint':
+            case 'decimal':
+            case 'dec':
+            case 'float':
+            case 'double':
+            case 'year':
+                if (isset($dbtype[1])) {
+                    return;
+                } [
                     'type' => 'numeric',
                     'maximum' => intval($dbtype[1]),
                 ];
 
-            return ['type' => 'numeric'];
-        case 'date':
-            return ['type' => 'date-only'];
-        case 'datetime':
-        case 'timestamp':
-            return ['type' => 'datetime'];
-        case 'time':
-            return ['type' => 'time-only'];
-        case 'binary':
-        case 'varbinary':
-        case 'blob':
-        case 'tinyblob':
-        case 'mediumblob':
-        case 'longblob':
-            return ['type' => 'any'];
+                return ['type' => 'numeric'];
+            case 'date':
+                return ['type' => 'date-only'];
+            case 'datetime':
+            case 'timestamp':
+                return ['type' => 'datetime'];
+            case 'time':
+                return ['type' => 'time-only'];
+            case 'binary':
+            case 'varbinary':
+            case 'blob':
+            case 'tinyblob':
+            case 'mediumblob':
+            case 'longblob':
+                return ['type' => 'any'];
         }
 
         $this->errors['type '.$type] = 'Unknown database type';
         return ['type' => 'any'];
     }
 
-    public static function getAllColumnsNamesFromTable( $table ) {
+    public static function getAllColumnsNamesFromTable($table)
+    {
         switch (DB::connection()->getConfig('driver')) {
             //case 'pgsql':
                 //$query = "SELECT column_name FROM information_schema.columns WHERE table_name = '".$this->getTable()."'";
@@ -525,7 +545,7 @@ class Raml {
                 //$reverse = false;
                 //break;
 
-            default: 
+            default:
                 $error = 'Database driver not supported: '.DB::connection()->getConfig('driver');
                 throw new Exception($error);
                 break;
@@ -533,20 +553,17 @@ class Raml {
 
         $columns = array();
 
-        foreach(DB::select($query) as $column)
-        {
+        foreach (DB::select($query) as $column) {
             $columns[$column->$column_name] = [
                 'type' => $column->$column_type,
                 'required' => $column->$column_nullable == 'YES' || $column->$column_default !== null,
             ];
         }
 
-        if($reverse)
-        {
+        if ($reverse) {
             $columns = array_reverse($columns);
         }
 
         return $columns;
     }
-    
 }

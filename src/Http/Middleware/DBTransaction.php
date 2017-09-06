@@ -1,9 +1,11 @@
 <?php
 namespace DreamHack\SDK\Http\Middleware;
+
 use Closure;
 use DB;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
+
 class DBTransaction
 {
     /**

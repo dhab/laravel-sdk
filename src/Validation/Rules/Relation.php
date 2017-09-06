@@ -19,7 +19,8 @@ class Relation extends Exists
      * @param  array  $values
      * @return void
      */
-    public function __construct(string $class) {
+    public function __construct(string $class)
+    {
         $this->class = $class;
 
         $model = new $class;
@@ -27,7 +28,7 @@ class Relation extends Exists
         $table = $model->getTable();
         $column = $model->getKeyName();
         parent::__construct($table, $column);
-        if(method_exists($model, 'getDeletedAtColumn')) {
+        if (method_exists($model, 'getDeletedAtColumn')) {
             $this->whereNull($model->getDeletedAtColumn());
         }
     }

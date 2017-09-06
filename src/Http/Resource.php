@@ -9,10 +9,12 @@ use Illuminate\Http\Request;
 use DB;
 use Validator;
 
-trait Resource {
+trait Resource
+{
     public abstract static function getClass();
 
-    public static function getDefaultRelations() {
+    public static function getDefaultRelations()
+    {
         $class = static::getClass();
         return $class::getDefaultRelations();
     }
@@ -20,16 +22,19 @@ trait Resource {
     /**
      * Get base request for fetching resource.
      */
-    protected static function query() {
+    protected static function query()
+    {
         $class = static::getClass();
         return $class::ordered()->with(static::getDefaultRelations());
     }
 
-    protected static function findOrFail($id) {
+    protected static function findOrFail($id)
+    {
         return static::query()->findOrFail($id);
     }
 
-    protected static function getId() {
+    protected static function getId()
+    {
         $route = request()->route();
         return $route->parameter(end($route->parameterNames));
     }
@@ -37,8 +42,9 @@ trait Resource {
     /**
      * Format response object
      */
-    private static function response($data) {
-        if(method_exists(__CLASS__, "getResponseClass")) {
+    private static function response($data)
+    {
+        if (method_exists(__CLASS__, "getResponseClass")) {
             $response = static::getResponseClass();
             return new $response($data);
         } else {
@@ -46,36 +52,39 @@ trait Resource {
         }
     }
 
-    private static function getRequiredFields() {
+    private static function getRequiredFields()
+    {
         $class = static::getClass();
         return $class::getRequiredFields();
     }
-    private static function getFieldValidators() {
+    private static function getFieldValidators()
+    {
         $class = static::getClass();
         return $class::getFieldValidators();
     }
 
-    protected static function getValidationRules($indicate_required = false) {
+    protected static function getValidationRules($indicate_required = false)
+    {
         $required = self::getRequiredFields();
         $rules = self::getFieldValidators();
 
         foreach ($rules as $key => $rule) {
             $val = "nullable";
-            if(in_array($key, $required)) {
-                if($indicate_required) {
+            if (in_array($key, $required)) {
+                if ($indicate_required) {
                     $val = "required";
                 } else {
                     continue;
                 }
             }
-            if(is_array($rule)) {
+            if (is_array($rule)) {
                 array_unshift($rules[$key], $val);
             } else {
                 $rules[$key] = $val."|".$rule;
             }
         }
-        foreach($required as $field) {
-            if(!isset($rules[$field])) {
+        foreach ($required as $field) {
+            if (!isset($rules[$field])) {
                 $rules[$field] = "required";
             }
         }
@@ -108,13 +117,14 @@ trait Resource {
      * @param  Request $request
      * @return DreamHack\SDK\Http\Responses\InstantiableModelResponse
      */
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         $rules = static::getValidationRules(true);
         $this->validate($request, $rules);
         $validated = collect($request->all())->only(array_keys($rules))->all();
         $class = static::getClass();
         $item = (new $class())->fill($validated);
-        if(!$item->save()) {
+        if (!$item->save()) {
             // handle db error
         }
         $item->load(static::getDefaultRelations());
@@ -127,7 +137,8 @@ trait Resource {
      * @param  string $id
      * @return DreamHack\SDK\Http\Responses\InstantiableModelResponse
      */
-    public function update(Request $request) {
+    public function update(Request $request)
+    {
         $class = static::getClass();
         
         $item = $class::findOrFail(static::getId());
@@ -136,7 +147,7 @@ trait Resource {
         $this->validate($request, $rules);
         $validated = collect($request->all())->only(array_keys($rules))->all();
         $item->fill($validated);
-        if(!$item->save()) {
+        if (!$item->save()) {
             // handle db error
         }
         $item->load(static::getDefaultRelations());
@@ -149,12 +160,13 @@ trait Resource {
      * @param  string $id
      * @return DreamHack\SDK\Http\Responses\BooleanResponse
      */
-    public function destroy(Request $request) {
+    public function destroy(Request $request)
+    {
         $class = static::getClass();
 
         $item = $class::findOrFail(static::getId());
 
-        if($item->delete()) {
+        if ($item->delete()) {
             return response()->true();
         } else {
             return response()->false();
@@ -166,13 +178,14 @@ trait Resource {
      * @param  Request $request
      * @return DreamHack\SDK\Http\Responses\BooleanResponse
      */
-    public function batchDestroy(Request $request) {
+    public function batchDestroy(Request $request)
+    {
         $class = static::getClass();
         $validator = Validator::make($request->all(), ["*" => [Rule::relation($class)]]);
         $validator->validate();
-        DB::transaction(function() use ($class, $request) {
+        DB::transaction(function () use ($class, $request) {
             $items = $request->all();
-            foreach($items as $id) {
+            foreach ($items as $id) {
                 $item = $class::findOrFail($id);
                 $item->delete();
             }
@@ -185,12 +198,13 @@ trait Resource {
      * @param  Request $request
      * @return DreamHack\SDK\Http\Responses\InstantiableModelResponse
      */
-    public function batch(Request $request) {
+    public function batch(Request $request)
+    {
         $class = static::getClass();
         $model = new $class;
         $createRules = static::getValidationRules(true);
         $updateRules = static::getValidationRules();
-        if(!isset($updateRules[$model->getKeyName()])) {
+        if (!isset($updateRules[$model->getKeyName()])) {
             $updateRules[$model->getKeyName()] = [];
         }
         $updateRules[$model->getKeyName()][] = Rule::relation($class);
@@ -199,39 +213,37 @@ trait Resource {
             "create" => ["required", "array"],
             "update" => ["required", "array"],
         ];
-        foreach($createRules as $key => $rule) {
+        foreach ($createRules as $key => $rule) {
             $rules["create.*.".$key] = $rule;
         }
-        foreach($updateRules as $key => $rule) {
+        foreach ($updateRules as $key => $rule) {
             $rules["update.*.".$key] = $rule;
         }
         $this->validate($request, $rules);
 
         $return = collect([]);
-        DB::transaction(function() use($class, $createRules, $updateRules, $request, $return, $model) {
-            collect($request->get('create'))->each(function($row) use ($createRules, $class, $return) {
+        DB::transaction(function () use ($class, $createRules, $updateRules, $request, $return, $model) {
+            collect($request->get('create'))->each(function ($row) use ($createRules, $class, $return) {
                 $validated = collect($row)->only(array_keys($createRules))->all();
                 $item = (new $class())->fill($validated);
-                if(!$item->save()) {
+                if (!$item->save()) {
                     throw new Exception("Couldn't create model.");
                 }
                 $return->push($item);
             });
-            collect($request->get('update'))->each(function($row) use ($updateRules, $class, $return, $model) {
+            collect($request->get('update'))->each(function ($row) use ($updateRules, $class, $return, $model) {
                 $validated = collect($row)->only(array_keys($updateRules))->except($model->getKeyName())->all();
                 $item = $class::findOrFail($row[$model->getKeyName()]);
                 $item->fill($validated);
-                if(!$item->save()) {
+                if (!$item->save()) {
                     throw new Exception("Couldn't update model.");
                 }
                 $return->push($item);
             });
         });
-        $return->each(function($item) {
+        $return->each(function ($item) {
             $item->load(static::getDefaultRelations());
         });
         return self::response($return);
-
     }
-
 }

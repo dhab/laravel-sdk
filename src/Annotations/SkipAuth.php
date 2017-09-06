@@ -10,15 +10,16 @@ use ReflectionClass;
 /**
  * @Annotation
  */
-class SkipAuth extends Annotation {
+class SkipAuth extends Annotation
+{
 
-	/**
-	* {@inheritdoc}
-	*/
-	public function modify(MethodEndpoint $endpoint, ReflectionMethod $method)
-	{
-		$endpoint->skipAuth = true;
-	}
+    /**
+    * {@inheritdoc}
+    */
+    public function modify(MethodEndpoint $endpoint, ReflectionMethod $method)
+    {
+        $endpoint->skipAuth = true;
+    }
 
     /**
      * {@inheritdoc}
@@ -26,7 +27,7 @@ class SkipAuth extends Annotation {
     public function modifyCollection(EndpointCollection $endpoints, ReflectionClass $class)
     {
         foreach ($endpoints as $endpoint) {
-        	$endpoint->skipAuth = true;
+            $endpoint->skipAuth = true;
         }
     }
 }

@@ -37,35 +37,37 @@ class Handler extends ExceptionHandler
         $message = $e->getMessage();
         $headers = [];
 
-        if (is_object($message)) { $message = $message->toArray(); }
+        if (is_object($message)) {
+            $message = $message->toArray();
+        }
 
         $payload = [
             "status" => 500,
             "error" => $message
         ];
-        if(is_callable(array($e, 'getStatusCode'))) {
+        if (is_callable(array($e, 'getStatusCode'))) {
             $payload["status"] = $e->getStatusCode();
         }
-        if(app()->environment('local')){
+        if (app()->environment('local')) {
             $payload['file'] = $e->getFile();
             $payload['line'] = $e->getLine();
             $payload['trace'] = $e->getTrace();
         }
-        if($e instanceof ModelNotFoundException) {
+        if ($e instanceof ModelNotFoundException) {
             $payload['status'] = 404;
             $payload['error'] = "Model Not Found";
         }
-        if($e instanceof ValidationException) {
+        if ($e instanceof ValidationException) {
             $payload['status'] = 422;
             $payload['error'] = $e->validator->errors()->getMessages();
         }
-        if($payload['status'] == 404 && empty($payload['error'])) {
+        if ($payload['status'] == 404 && empty($payload['error'])) {
             $payload['error'] = "Not Found";
         }
-        if($payload['status'] == 405 && empty($payload['error'])) {
+        if ($payload['status'] == 405 && empty($payload['error'])) {
             $payload['error'] = "Method Not Allowed";
         }
-        if(is_callable([$e, 'getHeaders'])) {
+        if (is_callable([$e, 'getHeaders'])) {
             $headers = $e->getHeaders();
         }
 

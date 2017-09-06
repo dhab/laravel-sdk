@@ -13,18 +13,22 @@ class FakerServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot() { }
+    public function boot()
+    {
+    }
 
     /**
      * Register any application services.
      */
-    public function register() {
+    public function register()
+    {
         $this->app->singleton(Generator::class, function ($app) {
             return Factory::create();
         });
     }
 
-    public function provides() {
+    public function provides()
+    {
         return [
             Generator::class,
         ];

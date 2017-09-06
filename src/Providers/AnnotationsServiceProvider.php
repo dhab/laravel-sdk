@@ -6,7 +6,8 @@ use Collective\Annotations\Routing\Annotations\Scanner as RouteScanner;
 use DreamHack\SDK\Annotations\Scanner as ManifestScanner;
 use DreamHack\SDK\Http\Controllers\ManifestController;
 
-class AnnotationsServiceProvider extends ServiceProvider {
+class AnnotationsServiceProvider extends ServiceProvider
+{
 
     /**
      * Determines if we will auto-scan in the local environment.
@@ -48,7 +49,7 @@ class AnnotationsServiceProvider extends ServiceProvider {
     protected $additionalRouteNamespaces = [
     ];
 
-    protected $servicesToLoad = [  
+    protected $servicesToLoad = [
         AuthServiceProvider::class,
         DHIDServiceProvider::class,
         FakerServiceProvider::class,
@@ -61,12 +62,13 @@ class AnnotationsServiceProvider extends ServiceProvider {
      *
      * @return void
      */
-    public function register() {
+    public function register()
+    {
         parent::register();
 
         $this->registerManifestScanner();
 
-        foreach($this->servicesToLoad as $service) {
+        foreach ($this->servicesToLoad as $service) {
             $this->app->register($service);
         }
     }
@@ -80,7 +82,7 @@ class AnnotationsServiceProvider extends ServiceProvider {
     public function addRoutingAnnotations(RouteScanner $scanner)
     {
         parent::addRoutingAnnotations($scanner);
-        $scanner->addAnnotationNamespace( 'DreamHack\SDK\Annotations', __DIR__.'/../Annotations' );
+        $scanner->addAnnotationNamespace('DreamHack\SDK\Annotations', __DIR__.'/../Annotations');
     }
 
 
@@ -95,7 +97,7 @@ class AnnotationsServiceProvider extends ServiceProvider {
             return $this->getAllClasses();
         }
         $routes = parent::routeScans();
-        foreach($this->additionalRouteNamespaces as $namespace) {
+        foreach ($this->additionalRouteNamespaces as $namespace) {
             $routes = array_merge($this->getClassesFromNamespace($namespace), $routes);
         }
         $routes = array_merge($this->scanRoutes, $routes);
@@ -121,7 +123,8 @@ class AnnotationsServiceProvider extends ServiceProvider {
         $scanner->setClassesToScan($scans);
 
         file_put_contents(
-          $this->finder->getScannedRoutesPath(), '<?php '.$scanner->getRouteDefinitions()
+            $this->finder->getScannedRoutesPath(),
+            '<?php '.$scanner->getRouteDefinitions()
         );
     }
 
@@ -134,24 +137,26 @@ class AnnotationsServiceProvider extends ServiceProvider {
     {
         $scanner = new ManifestScanner([]);
         $this->addRoutingAnnotations($scanner);
-        $scanner->addAnnotationNamespace( 'Collective\Annotations\Routing\Annotations\Annotations', base_path().'/vendor/laravelcollective/annotations/src/Routing/Annotations/Annotations' );
+        $scanner->addAnnotationNamespace('Collective\Annotations\Routing\Annotations\Annotations', base_path().'/vendor/laravelcollective/annotations/src/Routing/Annotations/Annotations');
         $scanner->setClassesToScan($this->routeScans());
         $this->app->instance('annotations.manifest.scanner', $scanner);
         $this->app->instance('annotations.route.scanner', $scanner);
     }
 
-    protected function getScanner() {
+    protected function getScanner()
+    {
         $this->app->make('annotations.route.scanner');
         $scanner = $this->app->make('annotations.manifest.scanner');
         return $scanner;
     }
 
-    public function getManifest($skipClass = false) {
+    public function getManifest($skipClass = false)
+    {
         return $this->getScanner()->getManifest($skipClass);
     }
 
-    public function getRAMLManifest($skipClass = false) {
+    public function getRAMLManifest($skipClass = false)
+    {
         return $this->getScanner()->getRAMLManifest($skipClass);
     }
-
 }

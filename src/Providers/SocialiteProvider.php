@@ -21,7 +21,7 @@ class SocialiteProvider extends AbstractProvider implements ProviderInterface
     protected function getAuthUrl($state)
     {
         return $this->buildAuthUrlFromBase(
-            config('services.dhid.authUrl', 'https://id.dreamhack.com/oauth/authorize'), 
+            config('services.dhid.authUrl', 'https://id.dreamhack.com/oauth/authorize'),
             $state
         );
     }
@@ -40,7 +40,7 @@ class SocialiteProvider extends AbstractProvider implements ProviderInterface
     protected function getUserByToken($token)
     {
         $response = $this->getHttpClient()->get(
-            config('services.dhid.apiBaseUrl', 'https://api.dreamhack.com').'/1/identity/me', 
+            config('services.dhid.apiBaseUrl', 'https://api.dreamhack.com').'/1/identity/me',
             [
                 'headers' => [
                     'Authorization' => 'Bearer '.$token,

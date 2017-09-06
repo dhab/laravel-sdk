@@ -12,19 +12,23 @@ class GuzzleServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot() { }
+    public function boot()
+    {
+    }
 
     /**
      * Register any application services.
      */
-    public function register() {
+    public function register()
+    {
         $this->app->singleton(Client::class, function ($app) {
             $config = isset($app['config']['guzzle']) ? $app['config']['guzzle'] : [];
             return new Client($config);
         });
     }
 
-    public function provides() {
+    public function provides()
+    {
         return [
             Client::class,
         ];

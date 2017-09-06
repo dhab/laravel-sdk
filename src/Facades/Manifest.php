@@ -1,6 +1,7 @@
 <?php
 
 namespace DreamHack\SDK\Facades;
+
 use Illuminate\Support\Facades\Facade;
 
 /**
