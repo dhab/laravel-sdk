@@ -15,4 +15,13 @@ class Model extends BaseModel {
 	{
 	    return $query->orderBy($this->orderBy?:"created_at", 'asc');
 	}
+
+
+    public static function getKeyByField() {
+        return "id";
+    }
+    public static function getGroupByField() {
+        return false;
+    }
+
 }

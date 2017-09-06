@@ -5,6 +5,7 @@ use Carbon\Carbon;
 use DreamHack\SDK\Contracts\Requestable;
 use DreamHack\SDK\Eloquent\Model;
 use Illuminate\Http\Response as IlluminateResponse;
+use Illuminate\Support\Collection;
 
 class Response extends IlluminateResponse {
 
@@ -42,7 +43,11 @@ class Response extends IlluminateResponse {
                     if($value === null ){
                         continue;
                     }
-                    $value = self::castCollectionSubsetIterator($castType::getFields())($value);
+                    if($value instanceof Collection) {
+                        $value = self::castCollectionSubset($value, $castType::getFields(), $castType::getKeyByField(), $castType::getGroupByField());
+                    } else {
+                        $value = self::castCollectionSubsetIterator($castType::getFields())($value);
+                    }
                 } else if(is_string($castType)) {
                     if($value === null) {
                         $ret[$field] = $value;   
@@ -93,7 +98,7 @@ class Response extends IlluminateResponse {
 		};
 	}
 
-	protected function castCollectionSubset($collection, $fields, $idKey = false, $groupBy = false) {
+	protected static function castCollectionSubset($collection, $fields, $idKey = false, $groupBy = false) {
         if($groupBy) {
             $ret = collect([]);
             $collection = $collection->groupBy($groupBy)->all();
@@ -103,13 +108,12 @@ class Response extends IlluminateResponse {
                 }
                 $ret[$key] = $group->map(self::castCollectionSubsetIterator($fields));
             }
-            // dd($ret);
             return $ret;
         }
         if($idKey) {
             $collection = $collection->keyBy($idKey);
         }
-		return $collection->map(self::castCollectionSubsetIterator($fields));
+		return $collection->map(static::castCollectionSubsetIterator($fields));
 	}
 
     /**
