@@ -19,25 +19,25 @@ class Response extends IlluminateResponse {
         ];
     }
 
-	public function __construct($content, $status = false, $headers = false) {
+    public function __construct($content, $status = false, $headers = false) {
         parent::__construct($content, $status?:self::getDefaultStatusCode(), $headers?array_merge(self::getBaseHeaders(), $headers):self::getBaseHeaders());
-	}
+    }
 
 
-	protected function collectionSubset($collection, $fields) {
-		return $collection->map(function($row) use ($fields) {
-			$ret = [];
-			foreach($fields as $field) {
-				$ret[$field] = $row->$field;
-			}
-			return $ret;
-		});
-	}
+    protected function collectionSubset($collection, $fields) {
+        return $collection->map(function($row) use ($fields) {
+            $ret = [];
+            foreach($fields as $field) {
+                $ret[$field] = $row->$field;
+            }
+            return $ret;
+        });
+    }
 
-	protected static function castCollectionSubsetIterator($fields) {
-		return function($row) use ($fields) {
-			$ret = [];
-			foreach($fields as $field => $castType) {
+    protected static function castCollectionSubsetIterator($fields) {
+        return function($row) use ($fields) {
+            $ret = [];
+            foreach($fields as $field => $castType) {
                 $value = $row->$field;
                 if(class_exists($castType) && (is_subclass_of($castType, Model::class) || in_array(Requestable::class, class_implements($castType)))) {
                     if($value === null ){
@@ -92,13 +92,13 @@ class Response extends IlluminateResponse {
                 } else {
                     continue;
                 }
-				$ret[$field] = $value;
-			}
-			return $ret;
-		};
-	}
+                $ret[$field] = $value;
+            }
+            return $ret;
+        };
+    }
 
-	protected static function castCollectionSubset($collection, $fields, $idKey = false, $groupBy = false) {
+    protected static function castCollectionSubset($collection, $fields, $idKey = false, $groupBy = false) {
         if($groupBy) {
             $ret = collect([]);
             $collection = $collection->groupBy($groupBy)->all();
@@ -113,8 +113,8 @@ class Response extends IlluminateResponse {
         if($idKey) {
             $collection = $collection->keyBy($idKey);
         }
-		return $collection->map(static::castCollectionSubsetIterator($fields));
-	}
+        return $collection->map(static::castCollectionSubsetIterator($fields));
+    }
 
     /**
      * Decode the given JSON back into an array or object.
