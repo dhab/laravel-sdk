@@ -138,7 +138,8 @@ class AnnotationsServiceProvider extends ServiceProvider
         $scanner = new ManifestScanner([]);
         $this->addRoutingAnnotations($scanner);
         $scanner->addAnnotationNamespace('Collective\Annotations\Routing\Annotations\Annotations', base_path().'/vendor/laravelcollective/annotations/src/Routing/Annotations/Annotations');
-        $scanner->setClassesToScan($this->routeScans());
+        $routesToScan = $this->routeScans();
+        $scanner->setClassesToScan($routesToScan);
         $this->app->instance('annotations.manifest.scanner', $scanner);
         $this->app->instance('annotations.route.scanner', $scanner);
     }
