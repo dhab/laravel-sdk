@@ -47,7 +47,7 @@ class Response extends IlluminateResponse
             $ret = [];
             foreach ($fields as $field => $castType) {
                 if (class_exists($castType) && (is_subclass_of($castType, Model::class) || in_array(Requestable::class, class_implements($castType)))) {
-                    if(!$row->relationLoaded($field)) {
+                    if (!$row->relationLoaded($field)) {
                         continue;
                     }
                     $value = $row->$field;
