@@ -31,7 +31,6 @@ class User implements Authenticatable
     }
     public function setRememberToken($value)
     {
-        
     }
     public function getRememberTokenName()
     {
@@ -56,7 +55,8 @@ class User implements Authenticatable
     {
         return $this->email;
     }
-    public function isLoggedIn() {
+    public function isLoggedIn()
+    {
         return $this->logged_in;
     }
     public function __construct(Request $request, $error = false)

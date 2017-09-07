@@ -21,7 +21,6 @@ class Provider implements UserProvider
 
     public function updateRememberToken(Authenticatable $user, $token)
     {
-        
     }
 
     public function retrieveByCredentials(array $credentials)
