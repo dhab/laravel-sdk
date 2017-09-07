@@ -46,8 +46,11 @@ class Response extends IlluminateResponse
         return function ($row) use ($fields) {
             $ret = [];
             foreach ($fields as $field => $castType) {
-                $value = $row->$field;
                 if (class_exists($castType) && (is_subclass_of($castType, Model::class) || in_array(Requestable::class, class_implements($castType)))) {
+                    if (!$row->relationLoaded($field)) {
+                        continue;
+                    }
+                    $value = $row->$field;
                     if ($value === null) {
                         continue;
                     }
@@ -57,6 +60,7 @@ class Response extends IlluminateResponse
                         $value = self::castCollectionSubsetIterator($castType::getFields())($value);
                     }
                 } elseif (is_string($castType)) {
+                    $value = isset($row->$field)?$row->$field:null;
                     if ($value === null) {
                         $ret[$field] = $value;
                         continue;
