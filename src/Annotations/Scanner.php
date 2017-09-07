@@ -20,7 +20,7 @@ function getLength($endpoint)
         }
     }
     
-    if($endpoint instanceof ResourceEndpoint) {
+    if ($endpoint instanceof ResourceEndpoint) {
         usort($paths, function ($a, $b) {
             return (strlen($a) < strlen($b)) ? -1 : 1;
         });

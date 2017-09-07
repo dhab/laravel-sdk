@@ -9,21 +9,28 @@ use Illuminate\Http\Request;
 
 class Provider implements UserProvider
 {
-    public function retrieveById($identifier) {
+    public function retrieveById($identifier)
+    {
         return null;
     }
 
-    public function retrieveByToken($identifier, $token) {
+    public function retrieveByToken($identifier, $token)
+    {
         return null;
     }
 
-    public function updateRememberToken(Authenticatable $user, $token) { }
+    public function updateRememberToken(Authenticatable $user, $token)
+    {
+        
+    }
 
-    public function retrieveByCredentials(array $credentials) {
+    public function retrieveByCredentials(array $credentials)
+    {
         return null;
     }
 
-    public function validateCredentials(Authenticatable $user, array $credentials) {
+    public function validateCredentials(Authenticatable $user, array $credentials)
+    {
         return false;
     }
 }

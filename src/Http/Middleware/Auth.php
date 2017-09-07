@@ -23,7 +23,7 @@ class Auth
     {
         // dd(get_class_methods(app()));
         $user = app()->make(User::class);
-        if($user->isLoggedIn()) {
+        if ($user->isLoggedIn()) {
             AuthFacade::guard()->setUser($user);
         }
         return $next($request);

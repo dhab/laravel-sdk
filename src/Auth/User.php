@@ -13,20 +13,28 @@ class User implements Authenticatable
     private $name = '';
     private $email = '';
 
-    public function getAuthIdentifierName() {
+    public function getAuthIdentifierName()
+    {
         return 'id';
     }
-    public function getAuthIdentifier() {
+    public function getAuthIdentifier()
+    {
         return $this->id;
     }
-    public function getAuthPassword() {
+    public function getAuthPassword()
+    {
         return '';
     }
-    public function getRememberToken() {
+    public function getRememberToken()
+    {
         return '';
     }
-    public function setRememberToken($value) {}
-    public function getRememberTokenName() {
+    public function setRememberToken($value)
+    {
+        
+    }
+    public function getRememberTokenName()
+    {
         return '';
     }
 
