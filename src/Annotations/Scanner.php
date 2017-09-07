@@ -20,9 +20,15 @@ function getLength($endpoint)
         }
     }
     
-    usort($paths, function ($a, $b) {
-        return (strlen($a) > strlen($b)) ? -1 : 1;
-    });
+    if($endpoint instanceof ResourceEndpoint) {
+        usort($paths, function ($a, $b) {
+            return (strlen($a) < strlen($b)) ? -1 : 1;
+        });
+    } else {
+        usort($paths, function ($a, $b) {
+            return (strlen($a) > strlen($b)) ? -1 : 1;
+        });
+    }
     $path = $paths[0]??'';
     
 
