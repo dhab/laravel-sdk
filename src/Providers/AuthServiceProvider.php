@@ -34,7 +34,7 @@ class AuthServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(User::class, function ($app) {
-            return new User($app['request']);
+            return new User($app['request']->headers->get('Solid-Authorization'));
         });
     }
 
