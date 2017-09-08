@@ -63,7 +63,8 @@ trait Resource
         return $class::getFieldValidators();
     }
 
-    protected static function formatValidationRules($rules = [], $required = [], $indicate_required = false) {
+    protected static function formatValidationRules($rules = [], $required = [], $indicate_required = false)
+    {
         foreach ($rules as $key => $rule) {
             $val = "nullable";
             if (in_array($key, $required)) {

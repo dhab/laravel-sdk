@@ -7,8 +7,9 @@ use DreamHack\SDK\Facades\Fake;
 
 abstract class TestCase extends BaseTestCase
 {
-    protected function mockUser($attributes = []) {
-        return new User(json_encode( $attributes + [
+    protected function mockUser($attributes = [])
+    {
+        return new User(json_encode($attributes + [
             'id' => Fake::uuid(),
             'number' => Fake::randomNumber(),
             'name' => "PastaMannen".Fake::randomNumber(4),
