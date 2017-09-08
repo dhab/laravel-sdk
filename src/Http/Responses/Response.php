@@ -48,6 +48,9 @@ class Response extends IlluminateResponse
             $ret = [];
             foreach ($fields as $field => $castType) {
                 if (is_string($castType) && class_exists($castType) && (is_subclass_of($castType, Model::class) || in_array(Requestable::class, class_implements($castType)))) {
+                    if(!is_subclass_of($row, Model::class)) {
+                        continue;
+                    }
                     if (!$row->relationLoaded($field)) {
                         continue;
                     }
@@ -64,8 +67,24 @@ class Response extends IlluminateResponse
                     if (is_callable([$row, $field])) {
                         $relation = call_user_func([$row, $field]);
                         if ($relation instanceof Relation) {
-                            if (!$row->relationLoaded($field)) {
+                            if(is_subclass_of($castType, Model::class)) {
+                                if (!$row->relationLoaded($field)) {
+                                    continue;
+                                }
+                            }
+                            $value = $row->$field;
+                            if ($value === null) {
                                 continue;
+                            }
+                            if ($value instanceof Collection) {
+                                $class = get_class($value->first());
+                                if (is_subclass_of($class, Model::class) || in_array(Requestable::class, class_implements($class))) {
+                                    $value = self::castCollectionSubset($value, $castType, $class::getKeyByField(), $class::getGroupByField());
+                                } else {
+                                    $value = self::castCollectionSubset($value, $castType);
+                                }
+                            } else {
+                                $value = self::castCollectionSubsetIterator($castType)($value);
                             }
                         }
                     }
