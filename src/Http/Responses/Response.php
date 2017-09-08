@@ -7,6 +7,7 @@ use DreamHack\SDK\Contracts\Requestable;
 use DreamHack\SDK\Eloquent\Model;
 use Illuminate\Http\Response as IlluminateResponse;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use stdClass;
 
 class Response extends IlluminateResponse
@@ -46,7 +47,7 @@ class Response extends IlluminateResponse
         return function ($row) use ($fields) {
             $ret = [];
             foreach ($fields as $field => $castType) {
-                if (class_exists($castType) && (is_subclass_of($castType, Model::class) || in_array(Requestable::class, class_implements($castType)))) {
+                if (is_string($castType) && class_exists($castType) && (is_subclass_of($castType, Model::class) || in_array(Requestable::class, class_implements($castType)))) {
                     if (!$row->relationLoaded($field)) {
                         continue;
                     }
@@ -58,6 +59,15 @@ class Response extends IlluminateResponse
                         $value = self::castCollectionSubset($value, $castType::getFields(), $castType::getKeyByField(), $castType::getGroupByField());
                     } else {
                         $value = self::castCollectionSubsetIterator($castType::getFields())($value);
+                    }
+                } elseif (is_array($castType)) {
+                    if (is_callable([$row, $field])) {
+                        $relation = call_user_func([$row, $field]);
+                        if ($relation instanceof Relation) {
+                            if (!$row->relationLoaded($field)) {
+                                continue;
+                            }
+                        }
                     }
                 } elseif (is_string($castType)) {
                     $value = isset($row->$field)?$row->$field:null;
