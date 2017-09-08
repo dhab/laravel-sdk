@@ -59,9 +59,9 @@ class User implements Authenticatable
     {
         return $this->logged_in;
     }
-    public function __construct(Request $request, $error = false)
+    public function __construct($solidAuth, $error = false)
     {
-        $user = json_decode($request->headers->get('Solid-Authorization'), true);
+        $user = json_decode($solidAuth, true);
         if ($user && $user['id']) {
             $this->logged_in = true;
             $this->id = $user['id'];

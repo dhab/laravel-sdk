@@ -63,11 +63,8 @@ trait Resource
         return $class::getFieldValidators();
     }
 
-    protected static function getValidationRules($indicate_required = false)
+    protected static function formatValidationRules($rules = [], $required = [], $indicate_required = false)
     {
-        $required = self::getRequiredFields();
-        $rules = self::getFieldValidators();
-
         foreach ($rules as $key => $rule) {
             $val = "nullable";
             if (in_array($key, $required)) {
@@ -89,6 +86,14 @@ trait Resource
             }
         }
         return $rules;
+    }
+
+    protected static function getValidationRules($indicate_required = false)
+    {
+        $required = self::getRequiredFields();
+        $rules = self::getFieldValidators();
+
+        return self::formatValidationRules($rules, $required, $indicate_required);
     }
 
     /**
@@ -210,8 +215,8 @@ trait Resource
         $updateRules[$model->getKeyName()][] = Rule::relation($class);
 
         $rules = [
-            "create" => ["required", "array"],
-            "update" => ["required", "array"],
+            "create" => ["array"],
+            "update" => ["array"],
         ];
         foreach ($createRules as $key => $rule) {
             $rules["create.*.".$key] = $rule;
