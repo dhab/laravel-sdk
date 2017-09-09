@@ -67,7 +67,7 @@ class Response extends IlluminateResponse
                     if (is_callable([$row, $field])) {
                         $relation = call_user_func([$row, $field]);
                         if ($relation instanceof Relation) {
-                            if (is_subclass_of($castType, Model::class)) {
+                            if (is_subclass_of($row, Model::class)) {
                                 if (!$row->relationLoaded($field)) {
                                     continue;
                                 }
