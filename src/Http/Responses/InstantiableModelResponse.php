@@ -16,6 +16,11 @@ class InstantiableModelResponse extends Response
     {
         return false;
     }
+    protected static function shouldPaginate()
+    {
+        return false;
+    }
+
     protected function formatReturn($class, $items, $fields)
     {
         $single = false;
@@ -39,6 +44,20 @@ class InstantiableModelResponse extends Response
         } else {
             $fields = $class::getFields();
         }
+
+        if($items instanceof \Illuminate\Pagination\LengthAwarePaginator ) {
+            parent::__construct([
+                'current_page' => $items->currentPage(),
+                'from' => $items->firstItem(),
+                'last_page' => $items->lastPage(),
+                'per_page' => $items->perPage(),
+                'to' => $items->lastItem(),
+                'total' => $items->total(),
+                'data' => $this->formatReturn($class, $items->getCollection(), $fields),
+            ], $status, $headers);
+            return;
+        }
+
         parent::__construct($this->formatReturn($class, $items, $fields), $status, $headers);
     }
 }
