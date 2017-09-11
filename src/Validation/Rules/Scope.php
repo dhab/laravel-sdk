@@ -17,7 +17,7 @@ class Scope
      */
     public function __construct(\Illuminate\Database\Eloquent\Builder $scope, string $pk = '')
     {
-        if ( $pk === '' ) {
+        if ($pk === '') {
             $pk = $scope->getModel()->getQualifiedKeyName();
         }
 

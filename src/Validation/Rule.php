@@ -13,7 +13,8 @@ class Rule extends IlluminateRule
         return new Rules\Relation($class);
     }
 
-    public static function scope(\Illuminate\Database\Eloquent\Builder $scope, string $pk='') {
+    public static function scope(\Illuminate\Database\Eloquent\Builder $scope, string $pk = '')
+    {
         return new Rules\Scope($scope, $pk);
     }
 }

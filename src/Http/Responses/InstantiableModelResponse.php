@@ -45,7 +45,7 @@ class InstantiableModelResponse extends Response
             $fields = $class::getFields();
         }
 
-        if($items instanceof \Illuminate\Pagination\LengthAwarePaginator ) {
+        if ($items instanceof \Illuminate\Pagination\LengthAwarePaginator) {
             parent::__construct([
                 'current_page' => $items->currentPage(),
                 'from' => $items->firstItem(),
