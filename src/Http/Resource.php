@@ -144,9 +144,7 @@ trait Resource
      */
     public function update(Request $request)
     {
-        $class = static::getClass();
-        
-        $item = $class::findOrFail(static::getId());
+        $item = static::findOrFail(static::getId());
 
         $rules = static::getValidationRules();
         $this->validate($request, $rules);
@@ -167,9 +165,7 @@ trait Resource
      */
     public function destroy(Request $request)
     {
-        $class = static::getClass();
-
-        $item = $class::findOrFail(static::getId());
+        $item = static::findOrFail(static::getId());
 
         if ($item->delete()) {
             return response()->true();
@@ -188,10 +184,10 @@ trait Resource
         $class = static::getClass();
         $validator = Validator::make($request->all(), ["*" => [Rule::relation($class)]]);
         $validator->validate();
-        DB::transaction(function () use ($class, $request) {
+        DB::transaction(function () use ($request) {
             $items = $request->all();
             foreach ($items as $id) {
-                $item = $class::findOrFail($id);
+                $item = static::findOrFail($id);
                 $item->delete();
             }
         });
@@ -236,9 +232,9 @@ trait Resource
                 }
                 $return->push($item);
             });
-            collect($request->get('update'))->each(function ($row) use ($updateRules, $class, $return, $model) {
+            collect($request->get('update'))->each(function ($row) use ($updateRules, $return, $model) {
                 $validated = collect($row)->only(array_keys($updateRules))->except($model->getKeyName())->all();
-                $item = $class::findOrFail($row[$model->getKeyName()]);
+                $item = static::findOrFail($row[$model->getKeyName()]);
                 $item->fill($validated);
                 if (!$item->save()) {
                     throw new Exception("Couldn't update model.");
