@@ -47,13 +47,15 @@ class InstantiableModelResponse extends Response
 
         if ($items instanceof \Illuminate\Pagination\LengthAwarePaginator) {
             parent::__construct([
-                'current_page' => $items->currentPage(),
-                'from' => $items->firstItem(),
-                'last_page' => $items->lastPage(),
-                'per_page' => $items->perPage(),
-                'to' => $items->lastItem(),
-                'total' => $items->total(),
-                'data' => $this->formatReturn($class, $items->getCollection(), $fields),
+                'paging' => [
+                    'current' => $items->currentPage(),
+                    'from' => $items->firstItem(),
+                    'last' => $items->lastPage(),
+                    'per_page' => $items->perPage(),
+                    'to' => $items->lastItem(),
+                    'total' => $items->total(),
+                ],
+                'results' => $this->formatReturn($class, $items->getCollection(), $fields),
             ], $status, $headers);
             return;
         }
