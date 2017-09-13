@@ -16,6 +16,7 @@ class InstantiableModelResponse extends Response
     {
         return false;
     }
+
     protected function formatReturn($class, $items, $fields)
     {
         $single = false;
@@ -39,6 +40,22 @@ class InstantiableModelResponse extends Response
         } else {
             $fields = $class::getFields();
         }
+
+        if ($items instanceof \Illuminate\Pagination\LengthAwarePaginator) {
+            parent::__construct([
+                'paging' => [
+                    'current' => $items->currentPage(),
+                    'from' => $items->firstItem(),
+                    'last' => $items->lastPage(),
+                    'per_page' => $items->perPage(),
+                    'to' => $items->lastItem(),
+                    'total' => $items->total(),
+                ],
+                'results' => $this->formatReturn($class, $items->getCollection(), $fields),
+            ], $status, $headers);
+            return;
+        }
+
         parent::__construct($this->formatReturn($class, $items, $fields), $status, $headers);
     }
 }
