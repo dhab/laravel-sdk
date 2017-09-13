@@ -16,10 +16,6 @@ class InstantiableModelResponse extends Response
     {
         return false;
     }
-    protected static function shouldPaginate()
-    {
-        return false;
-    }
 
     protected function formatReturn($class, $items, $fields)
     {
