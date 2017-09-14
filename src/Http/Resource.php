@@ -136,7 +136,7 @@ trait Resource
         $validated = collect($request->all())->only(array_keys($rules))->all();
         $validated = static::fillDefaultValues($validated);
         $item = (new $class())->fill($validated);
-        if(app(Gate::class)->getPolicyFor($class)) {
+        if (app(Gate::class)->getPolicyFor($class)) {
             $this->authorize('create', $item);
         }
         if (!$item->save()) {
@@ -161,7 +161,7 @@ trait Resource
         $validated = collect($request->all())->only(array_keys($rules))->all();
         $validated = static::fillDefaultValues($validated, $item);
         $item->fill($validated);
-        if(app(Gate::class)->getPolicyFor(static::getClass())) {
+        if (app(Gate::class)->getPolicyFor(static::getClass())) {
             $this->authorize('update', $item);
         }
         if (!$item->save()) {
@@ -180,7 +180,7 @@ trait Resource
     public function destroy(Request $request)
     {
         $item = static::findOrFail(static::getId());
-        if(app(Gate::class)->getPolicyFor(static::getClass())) {
+        if (app(Gate::class)->getPolicyFor(static::getClass())) {
             $this->authorize('delete', $item);
         }
 
@@ -204,7 +204,7 @@ trait Resource
         $items = $request->all();
         foreach ($items as $key => $id) {
             $items[$key] = static::findOrFail($id);
-            if(app(Gate::class)->getPolicyFor($class)) {
+            if (app(Gate::class)->getPolicyFor($class)) {
                 $this->authorize('delete', $items[$key]);
             }
         }
@@ -245,23 +245,23 @@ trait Resource
         }
         $this->validate($request, $rules);
         $creates = [];
-        foreach($request->get('create') as $row) {
+        foreach ($request->get('create') as $row) {
             $validated = collect($row)->only(array_keys($createRules))->all();
             $validated = static::fillDefaultValues($validated, false);
             $item = (new $class())->fill($validated);
-            if(app(Gate::class)->getPolicyFor($class)) {
+            if (app(Gate::class)->getPolicyFor($class)) {
                 $this->authorize('create', $item);
             }
             $creates[] = $item;
         }
 
         $updates = [];
-        foreach($request->get('update') as $row) {
+        foreach ($request->get('update') as $row) {
             $item = static::findOrFail($row[$keyName]);
             $validated = collect($row)->only(array_keys($updateRules))->except($keyName)->all();
             $validated = static::fillDefaultValues($validated, $item);
             $item->fill($validated);
-            if(app(Gate::class)->getPolicyFor($class)) {
+            if (app(Gate::class)->getPolicyFor($class)) {
                 $this->authorize('update', $item);
             }
             $updates[$item->$keyName] = $item;
@@ -269,13 +269,13 @@ trait Resource
 
         $return = collect([]);
         DB::transaction(function () use ($creates, $updates, $return, $keyName) {
-            foreach($creates as $item) {
+            foreach ($creates as $item) {
                 if (!$item->save()) {
                     throw new Exception("Couldn't create model.");
                 }
                 $return->push($item);
             }
-            foreach($updates as $item) {
+            foreach ($updates as $item) {
                 if (!$item->save()) {
                     throw new Exception("Couldn't update model #".($item->$keyName).".");
                 }
