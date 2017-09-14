@@ -228,10 +228,10 @@ trait Resource
         $keyName = $model->getKeyName();
         $createRules = static::getValidationRules(true);
         $updateRules = static::getValidationRules();
-        if (!isset($updateRules[$model->getKeyName()])) {
-            $updateRules[$model->getKeyName()] = [];
+        if (!isset($updateRules[$keyName])) {
+            $updateRules[$keyName] = [];
         }
-        $updateRules[$model->getKeyName()][] = Rule::relation($class);
+        $updateRules[$keyName][] = Rule::relation($class);
 
         $rules = [
             "create" => ["array"],
