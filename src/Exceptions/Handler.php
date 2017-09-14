@@ -53,6 +53,9 @@ class Handler extends ExceptionHandler
             $payload['line'] = $e->getLine();
             $payload['trace'] = $e->getTrace();
         }
+        if ($e instanceof AuthorizationException) {
+            $payload['status'] = 403;
+        }
         if ($e instanceof ModelNotFoundException) {
             $payload['status'] = 404;
             $payload['error'] = "Model Not Found";
