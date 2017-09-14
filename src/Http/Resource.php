@@ -5,6 +5,7 @@ use DreamHack\SDK\Http\Requests\ModelRequest;
 use DreamHack\SDK\Http\Responses\ModelResponse;
 use DreamHack\SDK\Http\Responses\InstantiableModelResponse;
 use DreamHack\SDK\Validation\Rule;
+use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Http\Request;
 use DB;
 use Validator;
@@ -50,6 +51,11 @@ trait Resource
         } else {
             return new InstantiableModelResponse(static::getClass(), $data);
         }
+    }
+
+    protected static function fillDefaultValues($values, $obj = false)
+    {
+        return $values;
     }
 
     private static function getRequiredFields()
@@ -124,11 +130,15 @@ trait Resource
      */
     public function store(Request $request)
     {
+        $class = static::getClass();
         $rules = static::getValidationRules(true);
         $this->validate($request, $rules);
         $validated = collect($request->all())->only(array_keys($rules))->all();
-        $class = static::getClass();
+        $validated = static::fillDefaultValues($validated);
         $item = (new $class())->fill($validated);
+        if(app(Gate::class)->getPolicyFor($class)) {
+            $this->authorize('create', $item);
+        }
         if (!$item->save()) {
             // handle db error
         }
@@ -149,7 +159,11 @@ trait Resource
         $rules = static::getValidationRules();
         $this->validate($request, $rules);
         $validated = collect($request->all())->only(array_keys($rules))->all();
+        $validated = static::fillDefaultValues($validated, $item);
         $item->fill($validated);
+        if(app(Gate::class)->getPolicyFor(static::getClass())) {
+            $this->authorize('update', $item);
+        }
         if (!$item->save()) {
             // handle db error
         }
@@ -166,6 +180,9 @@ trait Resource
     public function destroy(Request $request)
     {
         $item = static::findOrFail(static::getId());
+        if(app(Gate::class)->getPolicyFor(static::getClass())) {
+            $this->authorize('delete', $item);
+        }
 
         if ($item->delete()) {
             return response()->true();
@@ -184,10 +201,15 @@ trait Resource
         $class = static::getClass();
         $validator = Validator::make($request->all(), ["*" => [Rule::relation($class)]]);
         $validator->validate();
-        DB::transaction(function () use ($request) {
-            $items = $request->all();
-            foreach ($items as $id) {
-                $item = static::findOrFail($id);
+        $items = $request->all();
+        foreach ($items as $key => $id) {
+            $items[$key] = static::findOrFail($id);
+            if(app(Gate::class)->getPolicyFor($class)) {
+                $this->authorize('delete', $items[$key]);
+            }
+        }
+        DB::transaction(function () use ($class, $request) {
+            foreach ($items as $item) {
                 $item->delete();
             }
         });
@@ -203,6 +225,7 @@ trait Resource
     {
         $class = static::getClass();
         $model = new $class;
+        $keyName = $model->getKeyName();
         $createRules = static::getValidationRules(true);
         $updateRules = static::getValidationRules();
         if (!isset($updateRules[$model->getKeyName()])) {
@@ -221,26 +244,43 @@ trait Resource
             $rules["update.*.".$key] = $rule;
         }
         $this->validate($request, $rules);
+        $creates = [];
+        foreach($request->get('create') as $row) {
+            $validated = collect($row)->only(array_keys($createRules))->all();
+            $validated = static::fillDefaultValues($validated, false);
+            $item = (new $class())->fill($validated);
+            if(app(Gate::class)->getPolicyFor($class)) {
+                $this->authorize('create', $item);
+            }
+            $creates[] = $item;
+        }
+
+        $updates = [];
+        foreach($request->get('update') as $row) {
+            $item = static::findOrFail($row[$keyName]);
+            $validated = collect($row)->only(array_keys($updateRules))->except($keyName)->all();
+            $validated = static::fillDefaultValues($validated, $item);
+            $item->fill($validated);
+            if(app(Gate::class)->getPolicyFor($class)) {
+                $this->authorize('update', $item);
+            }
+            $updates[$item->$keyName] = $item;
+        }
 
         $return = collect([]);
-        DB::transaction(function () use ($class, $createRules, $updateRules, $request, $return, $model) {
-            collect($request->get('create'))->each(function ($row) use ($createRules, $class, $return) {
-                $validated = collect($row)->only(array_keys($createRules))->all();
-                $item = (new $class())->fill($validated);
+        DB::transaction(function () use ($creates, $updates, $return, $keyName) {
+            foreach($creates as $item) {
                 if (!$item->save()) {
                     throw new Exception("Couldn't create model.");
                 }
                 $return->push($item);
-            });
-            collect($request->get('update'))->each(function ($row) use ($updateRules, $return, $model) {
-                $validated = collect($row)->only(array_keys($updateRules))->except($model->getKeyName())->all();
-                $item = static::findOrFail($row[$model->getKeyName()]);
-                $item->fill($validated);
+            }
+            foreach($updates as $item) {
                 if (!$item->save()) {
-                    throw new Exception("Couldn't update model.");
+                    throw new Exception("Couldn't update model #".($item->$keyName).".");
                 }
                 $return->push($item);
-            });
+            }
         });
         $return->each(function ($item) {
             $item->load(static::getDefaultRelations());
