@@ -26,7 +26,7 @@ class Relation extends Exists
         $model = new $class;
 
         $table = $model->getTable();
-        if ( $column === null ) {
+        if ($column === null) {
             $column = $model->getKeyName();
         }
         parent::__construct($table, $column);
