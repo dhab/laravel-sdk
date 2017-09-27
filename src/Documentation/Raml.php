@@ -212,7 +212,7 @@ class Raml
                             }
 
                             // Clean/combine all childs
-                            $row[$key] = $lines = $clean($line, $combine );
+                            $row[$key] = $lines = $clean($line, $combine);
 
                             if ($combine) {
                                 // Do the combine of paths
