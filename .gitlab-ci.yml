@@ -1,17 +1,17 @@
-stages:
-  - test
-
-image: deriel/laravel:latest
-
 before_script:
+  - eval `ssh-agent -s`
+  - ssh-add <(echo "$SSH_PRIVATE_KEY")
+  - mkdir -p ~/.ssh
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   - composer install --no-suggest --no-progress
 
 variables:
   COMPOSER_CACHE_DIR: /cache/composer.cache
-  NPM_CONFIG_LOGLEVEL: warn
 
-test:
+
+
+unittests:
   stage: test
+  image: deriel/laravel:latest
   script:
-    - vendor/bin/phpcs -n --standard=PSR2 --report-full --report-source --report-summary src/
-    - vendor/bin/phpunit --coverage-text --colors=never
+    - ./check.sh
