@@ -14,7 +14,7 @@ class AddDhidToUsers extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('dhid',36)->nullable();
+            $table->string('dhid', 36)->nullable();
         });
     }
 
