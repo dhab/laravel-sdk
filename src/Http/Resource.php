@@ -108,7 +108,12 @@ trait Resource
      */
     public function index()
     {
-        $items = static::query()->get();
+        $q = static::query();
+        if (method_exists(__CLASS__, "shouldPaginate") && static::shouldPaginate()) {
+            $items = $q->paginate(min((int)(request()->get('limit') ?? 100), 1000));
+        } else {
+            $items = $q->get();
+        }
         return self::response($items);
     }
 
@@ -190,7 +195,7 @@ trait Resource
             return response()->false();
         }
     }
-    
+
     /**
      * Delete multiple records of the resource
      * @param  Request $request
