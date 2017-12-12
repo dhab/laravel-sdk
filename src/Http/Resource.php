@@ -110,7 +110,7 @@ trait Resource
     {
         $q = static::query();
         if (method_exists(__CLASS__, "shouldPaginate") && static::shouldPaginate()) {
-            $items = $q->paginate(min((int)(request()->get('limit') ?? 100), 1000));
+            $items = $q->paginate(max(min((int)(request()->get('per_page') ?? 100), 1000), 1));
         } else {
             $items = $q->get();
         }
