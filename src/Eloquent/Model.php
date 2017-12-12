@@ -16,7 +16,7 @@ class Model extends BaseModel
 
     public function scopeOrdered($query)
     {
-        return $query->orderBy($this->orderBy?:"created_at", 'asc');
+        return $query->orderBy($this->orderBy?:"created_at", $this->orderDirection?:'asc');
     }
 
 
