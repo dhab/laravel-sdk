@@ -42,9 +42,9 @@ class Response extends IlluminateResponse
         });
     }
 
-    protected static function castCollectionSubsetIterator($fields)
+    protected static function castCollectionSubsetIterator($fields, $responseType = null)
     {
-        return function ($row) use ($fields) {
+        return function ($row) use ($fields, $responseType) {
             $ret = [];
             foreach ($fields as $field => $castType) {
                 if (is_string($castType)) {
@@ -67,7 +67,7 @@ class Response extends IlluminateResponse
                                 $value = self::castInstance($value, $castType);
                             }
                         } else {
-                            $value = null;
+                            $value = self::castInstance(null, $castType);
                         }
                     }
                 } elseif (is_array($castType)) {
@@ -121,7 +121,11 @@ class Response extends IlluminateResponse
                                 $value = static::asTimestamp($value);
                                 break;
                             case 'self':
-                                $value = self::castInstance($value, $fields);
+                                if ($responseType) {
+                                    $value = self::castInstance($value, $responseType);
+                                } else {
+                                    $value = self::castInstance($value, $fields);
+                                }
                                 break;
                             case 'object':
                                 if (is_array($value) && empty($value)) {
@@ -151,7 +155,7 @@ class Response extends IlluminateResponse
         };
     }
 
-    protected static function castCollectionSubset($collection, $fields, $idKey = false, $groupBy = false)
+    protected static function castCollectionSubset($collection, $fields, $responseType, $idKey = false, $groupBy = false)
     {
         if ($collection->isEmpty()) {
             return new EmptyResponse(!$idKey && !$groupBy ? [] : (object)[]);
@@ -164,49 +168,48 @@ class Response extends IlluminateResponse
                 if ($idKey) {
                     $group = $group->keyBy($idKey);
                 }
-                $ret[$key] = $group->map(self::castCollectionSubsetIterator($fields));
+                $ret[$key] = $group->map(self::castCollectionSubsetIterator($fields, $responseType));
             }
             return $ret;
         }
         if ($idKey) {
             $collection = $collection->keyBy($idKey);
         }
-        return $collection->map(static::castCollectionSubsetIterator($fields));
+        return $collection->map(static::castCollectionSubsetIterator($fields, $responseType));
     }
 
     public static function castInstance($value, $definition)
     {
+        $responseType = null;
+
         if (is_array($definition)) {
             $class = get_class($value->first());
             $fields = $definition;
         } else {
             $class = $definition;
+            $responseType = $definition;
             $fields = $class::getFields();
         }
 
-        if ($value instanceof Collection) {
+        if ($value instanceof Collection || is_subclass_of($class, InstantiableModelResponse::class)) {
             if (is_subclass_of($class, Model::class) ||
                 in_array(Requestable::class, class_implements($class)) ||
                 is_subclass_of($class, InstantiableModelResponse::class) ||
                 $class == Response::class
             ) {
-                if ($value->isEmpty()) {
-                    // Empty collection
-                    if ($class == Response::class) {
-                        return (object)[];
-                    }
-                    // Emtpy model
-                    return (object)[];
-                }
-
                 $idKey = $class::getKeyByField();
                 $groupBy = $class::getGroupByField();
-                $value = static::castCollectionSubset($value, $fields, $idKey, $groupBy);
+
+                if ($value === null || $value->isEmpty()) {
+                    return !$idKey && !$groupBy ? [] : (object)[];
+                }
+
+                $value = static::castCollectionSubset($value, $fields, $responseType, $idKey, $groupBy);
             } else {
                 if ($value->isEmpty()) {
                     return [];
                 }
-                $value = static::castCollectionSubset($value, $fields);
+                $value = static::castCollectionSubset($value, $fields, $responseType);
             }
         } else {
             $value = static::castCollectionSubsetIterator($fields)($value);
