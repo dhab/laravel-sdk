@@ -84,7 +84,7 @@ class Response extends IlluminateResponse
                                 continue;
                             }
 
-                            $value = $this->castInstance($value, $castType);
+                            $value = self::castInstance($value, $castType);
                         }
                     }
                 } elseif (is_string($castType)) {
