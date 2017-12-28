@@ -169,7 +169,7 @@ class ResourceEndpoint extends BaseEndpoint
     protected function getCustomTemplate()
     {
         return '$router->%s(\'%s\', [
-    \'uses\' => %s,
+    \'uses\' => \'%s\',
     \'as\' => %s,
     \'middleware\' => [%s],
     \'where\' => [%s],
