@@ -26,7 +26,7 @@ class InstantiableModelResponse extends Response
         } elseif (! $items instanceof Collection) {
             throw new Exception("Invalid input");
         }
-        $return = $this->castCollectionSubset($items, $fields, static::getKeyByField(), $single?false:static::getGroupByField());
+        $return = $this->castCollectionSubset($items, $fields, get_class($this), static::getKeyByField(), $single?false:static::getGroupByField());
         if ($single) {
             $return = $return->first();
         }

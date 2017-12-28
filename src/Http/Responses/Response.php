@@ -42,26 +42,33 @@ class Response extends IlluminateResponse
         });
     }
 
-    protected static function castCollectionSubsetIterator($fields)
+    protected static function castCollectionSubsetIterator($fields, $responseType = null)
     {
-        return function ($row) use ($fields) {
+        return function ($row) use ($fields, $responseType) {
             $ret = [];
             foreach ($fields as $field => $castType) {
-                if (is_string($castType) && class_exists($castType) && (is_subclass_of($castType, Model::class) || in_array(Requestable::class, class_implements($castType)))) {
-                    if (!is_subclass_of($row, Model::class)) {
-                        continue;
-                    }
-                    if (!$row->relationLoaded($field)) {
-                        continue;
-                    }
-                    $value = $row->$field;
-                    if ($value === null) {
-                        continue;
-                    }
-                    if ($value instanceof Collection) {
-                        $value = self::castCollectionSubset($value, $castType::getFields(), $castType::getKeyByField(), $castType::getGroupByField());
-                    } else {
-                        $value = self::castCollectionSubsetIterator($castType::getFields())($value);
+                if (is_string($castType)) {
+                    $castOptions = explode(',', $castType);
+                    $castType = array_shift($castOptions);
+                }
+
+                if (is_string($castType) &&
+                    class_exists($castType) &&
+                    (
+                        is_subclass_of($castType, Model::class) ||
+                        in_array(Requestable::class, class_implements($castType)) ||
+                        is_subclass_of($castType, InstantiableModelResponse::class)
+                    )
+                ) {
+                    if (is_subclass_of($row, Model::class)) {
+                        if ($row->relationLoaded($field)) {
+                            $value = $row->$field;
+                            if ($value !== null) {
+                                $value = self::castInstance($value, $castType);
+                            }
+                        } else {
+                            continue;
+                        }
                     }
                 } elseif (is_array($castType)) {
                     if (is_callable([$row, $field])) {
@@ -76,76 +83,84 @@ class Response extends IlluminateResponse
                             if ($value === null) {
                                 continue;
                             }
-                            if ($value instanceof Collection) {
-                                $class = get_class($value->first());
-                                if (is_subclass_of($class, Model::class) || in_array(Requestable::class, class_implements($class))) {
-                                    $value = self::castCollectionSubset($value, $castType, $class::getKeyByField(), $class::getGroupByField());
-                                } else {
-                                    $value = self::castCollectionSubset($value, $castType);
-                                }
-                            } else {
-                                $value = self::castCollectionSubsetIterator($castType)($value);
-                            }
+
+                            $value = self::castInstance($value, $castType);
                         }
                     }
                 } elseif (is_string($castType)) {
                     $value = isset($row->$field)?$row->$field:null;
-                    if ($value === null) {
-                        $ret[$field] = $value;
-                        continue;
-                    }
-                    switch ($castType) {
-                        case 'int':
-                        case 'integer':
-                            $value = (int) $value;
-                            break;
-                        case 'real':
-                        case 'float':
-                        case 'double':
-                            $value = (float) $value;
-                            break;
-                        case 'uuid':
-                        case 'string':
-                            $value = (string) $value;
-                            break;
-                        case 'bool':
-                        case 'boolean':
-                            $value = (bool) $value;
-                            break;
-                        case 'collection':
-                            $value = new BaseCollection($value);
-                            break;
-                        case 'date':
-                            $value = static::asDate($value)->toW3cString();
-                            break;
-                        case 'datetime':
-                            $value = static::asDateTime($value)->toW3cString();
-                            break;
-                        case 'timestamp':
-                            $value = static::asTimestamp($value);
-                            break;
-                        case 'self':
-                            if ($value) {
-                                $value = self::castCollectionSubsetIterator($fields)($value);
-                            }
-                            break;
-                        case 'object':
-                            if (is_array($value) && empty($value)) {
-                                $value = new stdClass;
-                            }
-                            break;
+                    if ($value !== null) {
+                        switch ($castType) {
+                            case 'int':
+                            case 'integer':
+                                $value = (int) $value;
+                                break;
+                            case 'real':
+                            case 'float':
+                            case 'double':
+                                $value = (float) $value;
+                                break;
+                            case 'uuid':
+                            case 'string':
+                                $value = (string) $value;
+                                break;
+                            case 'bool':
+                            case 'boolean':
+                                $value = (bool) $value;
+                                break;
+                            case 'collection':
+                                $value = new BaseCollection($value);
+                                break;
+                            case 'date':
+                                $value = static::asDate($value)->toW3cString();
+                                break;
+                            case 'datetime':
+                                $value = static::asDateTime($value)->toW3cString();
+                                break;
+                            case 'timestamp':
+                                $value = static::asTimestamp($value);
+                                break;
+                            case 'self':
+                                if ($responseType) {
+                                    $value = static::castInstance($value, $responseType);
+                                } else {
+                                    $value = static::castInstance($value, $fields);
+                                }
+                                break;
+                            case 'object':
+                                if (is_array($value) && empty($value)) {
+                                    $value = new stdClass;
+                                }
+                                break;
+                        }
                     }
                 } else {
                     continue;
                 }
+
+                if ($value === null) {
+                    if (in_array('objectEmpty', $castOptions)) {
+                        $value = (object)[];
+                    } elseif (in_array('arrayEmpty', $castOptions)) {
+                        $value = [];
+                    } elseif (in_array('omitEmpty', $castOptions)) {
+                        continue;
+                    }
+                }
+
                 $ret[$field] = $value;
             }
+
             return $ret;
         };
     }
 
-    protected static function castCollectionSubset($collection, $fields, $idKey = false, $groupBy = false)
+    protected static function castCollectionSubset($collection, $fields, $responseType, $idKey = false, $groupBy = false)
     {
+        if ($collection->isEmpty()) {
+            return new EmptyResponse(!$idKey && !$groupBy ? [] : (object)[]);
+        }
+
         if ($groupBy) {
             $ret = collect([]);
             $collection = $collection->groupBy($groupBy)->all();
@@ -153,14 +168,55 @@ class Response extends IlluminateResponse
                 if ($idKey) {
                     $group = $group->keyBy($idKey);
                 }
-                $ret[$key] = $group->map(self::castCollectionSubsetIterator($fields));
+                $ret[$key] = $group->map(self::castCollectionSubsetIterator($fields, $responseType));
             }
             return $ret;
         }
         if ($idKey) {
             $collection = $collection->keyBy($idKey);
         }
-        return $collection->map(static::castCollectionSubsetIterator($fields));
+        return $collection->map(static::castCollectionSubsetIterator($fields, $responseType));
+    }
+
+    public static function castInstance($value, $definition)
+    {
+        $responseType = null;
+
+        if (is_array($definition)) {
+            $class = get_class($value->first());
+            $fields = $definition;
+        } else {
+            $class = $definition;
+            $responseType = $definition;
+            $fields = $class::getFields();
+        }
+
+        if ($value instanceof Collection || is_subclass_of($class, InstantiableModelResponse::class)) {
+            if (is_subclass_of($class, Model::class) ||
+                in_array(Requestable::class, class_implements($class)) ||
+                is_subclass_of($class, InstantiableModelResponse::class) ||
+                $class == Response::class
+            ) {
+                $idKey = $class::getKeyByField();
+                $groupBy = $class::getGroupByField();
+
+                if ($value === null || $value->isEmpty()) {
+                    return !$idKey && !$groupBy ? [] : (object)[];
+                }
+
+                $value = static::castCollectionSubset($value, $fields, $responseType, $idKey, $groupBy);
+            } else {
+                if ($value->isEmpty()) {
+                    return [];
+                }
+                $value = static::castCollectionSubset($value, $fields, $responseType);
+            }
+        } else {
+            if ($value !== null) {
+                $value = static::castCollectionSubsetIterator($fields)($value);
+            }
+        }
+        return $value;
     }
 
     /**
