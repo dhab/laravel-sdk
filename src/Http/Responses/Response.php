@@ -212,7 +212,7 @@ class Response extends IlluminateResponse
                 $value = static::castCollectionSubset($value, $fields, $responseType);
             }
         } else {
-            if ( $value !== null ) {
+            if ($value !== null) {
                 $value = static::castCollectionSubsetIterator($fields)($value);
             }
         }
