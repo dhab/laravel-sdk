@@ -122,9 +122,9 @@ class Response extends IlluminateResponse
                                 break;
                             case 'self':
                                 if ($responseType) {
-                                    $value = self::castInstance($value, $responseType);
+                                    $value = static::castInstance($value, $responseType);
                                 } else {
-                                    $value = self::castInstance($value, $fields);
+                                    $value = static::castInstance($value, $fields);
                                 }
                                 break;
                             case 'object':
