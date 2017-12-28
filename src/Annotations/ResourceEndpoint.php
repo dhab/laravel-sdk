@@ -118,8 +118,9 @@ class ResourceEndpoint extends BaseEndpoint
         $routes = [];
 
         foreach ($this->paths as $path) {
+            $routeDef = false;
             if ($this->isCustomPath($path)) {
-                $routes[] = sprintf(
+                $routeDef = sprintf(
                     $this->getCustomTemplate(),
                     $path->verb,
                     $this->getURIForPath($path),
@@ -130,7 +131,7 @@ class ResourceEndpoint extends BaseEndpoint
                     var_export($path->domain, true)
                 );
             } else {
-                $routes[] = sprintf(
+                $routeDef = sprintf(
                     $this->getTemplate(),
                     'Resource: '.$this->name.'@'.$path->method,
                     $this->implodeArray($this->getMiddleware($path)),
@@ -143,6 +144,7 @@ class ResourceEndpoint extends BaseEndpoint
                     $this->implodeArray($this->getNames($path))
                 );
             }
+            $routes[] = $routeDef;
         }
 
         return implode(PHP_EOL.PHP_EOL, $routes);
@@ -166,7 +168,8 @@ class ResourceEndpoint extends BaseEndpoint
      */
     protected function getCustomTemplate()
     {
-        return '$router->%s(\'%s\', \'%s\', [
+        return '$router->%s(\'%s\', [
+    \'uses\' => %s,
     \'as\' => %s,
     \'middleware\' => [%s],
     \'where\' => [%s],
