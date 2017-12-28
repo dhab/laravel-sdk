@@ -67,7 +67,7 @@ class Response extends IlluminateResponse
                                 $value = self::castInstance($value, $castType);
                             }
                         } else {
-                            $value = self::castInstance(null, $castType);
+                            continue;
                         }
                     }
                 } elseif (is_array($castType)) {
@@ -212,7 +212,9 @@ class Response extends IlluminateResponse
                 $value = static::castCollectionSubset($value, $fields, $responseType);
             }
         } else {
-            $value = static::castCollectionSubsetIterator($fields)($value);
+            if ( $value !== null ) {
+                $value = static::castCollectionSubsetIterator($fields)($value);
+            }
         }
         return $value;
     }
