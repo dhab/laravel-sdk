@@ -57,7 +57,7 @@ trait Resource
     protected static function fillDefaultValues($values, $obj = false, $rules = [])
     {
         foreach ($rules as $key => $rule) {
-            if(!isset($values[$key])) {
+            if (!isset($values[$key])) {
                 continue;
             }
             $isDate = false;
