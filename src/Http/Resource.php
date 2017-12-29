@@ -1,6 +1,7 @@
 <?php
 namespace DreamHack\SDK\Http;
 
+use Carbon\Carbon;
 use DreamHack\SDK\Http\Requests\ModelRequest;
 use DreamHack\SDK\Http\Responses\ModelResponse;
 use DreamHack\SDK\Http\Responses\InstantiableModelResponse;
@@ -53,8 +54,16 @@ trait Resource
         }
     }
 
-    protected static function fillDefaultValues($values, $obj = false)
+    protected static function fillDefaultValues($values, $obj = false, $rules = [])
     {
+        foreach ($rules as $key => $rule) {
+            $isDate = false;
+            foreach (is_array($rule)?$rule:[$rule] as $r) {
+                if (is_string($r) && strpos($r, 'date') !== false) {
+                    $values[$key] = Carbon::parse($values[$key]);
+                }
+            }
+        }
         return $values;
     }
 
@@ -139,7 +148,7 @@ trait Resource
         $rules = static::getValidationRules(true);
         $this->validate($request, $rules);
         $validated = collect($request->all())->only(array_keys($rules))->all();
-        $validated = static::fillDefaultValues($validated);
+        $validated = static::fillDefaultValues($validated, false, $rules);
         $item = (new $class())->fill($validated);
         if (app(Gate::class)->getPolicyFor($class)) {
             $this->authorize('create', $item);
@@ -164,7 +173,7 @@ trait Resource
         $rules = static::getValidationRules();
         $this->validate($request, $rules);
         $validated = collect($request->all())->only(array_keys($rules))->all();
-        $validated = static::fillDefaultValues($validated, $item);
+        $validated = static::fillDefaultValues($validated, $item, $rules);
         $item->fill($validated);
         if (app(Gate::class)->getPolicyFor(static::getClass())) {
             $this->authorize('update', $item);
@@ -252,7 +261,7 @@ trait Resource
         $creates = [];
         foreach ($request->get('create') as $row) {
             $validated = collect($row)->only(array_keys($createRules))->all();
-            $validated = static::fillDefaultValues($validated, false);
+            $validated = static::fillDefaultValues($validated, false, $createRules);
             $item = (new $class())->fill($validated);
             if (app(Gate::class)->getPolicyFor($class)) {
                 $this->authorize('create', $item);
@@ -264,7 +273,7 @@ trait Resource
         foreach ($request->get('update') as $row) {
             $item = static::findOrFail($row[$keyName]);
             $validated = collect($row)->only(array_keys($updateRules))->except($keyName)->all();
-            $validated = static::fillDefaultValues($validated, $item);
+            $validated = static::fillDefaultValues($validated, $item, $updateRules);
             $item->fill($validated);
             if (app(Gate::class)->getPolicyFor($class)) {
                 $this->authorize('update', $item);
