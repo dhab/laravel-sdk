@@ -46,7 +46,7 @@ trait Resource
      */
     private static function response($data)
     {
-        if (method_exists(__CLASS__, "getResponseClass")) {
+        if (method_exists(static::class, "getResponseClass")) {
             $response = static::getResponseClass();
             return new $response($data);
         } else {
@@ -121,7 +121,7 @@ trait Resource
     public function index()
     {
         $q = static::query();
-        if (method_exists(__CLASS__, "shouldPaginate") && static::shouldPaginate()) {
+        if (method_exists(static::class, "shouldPaginate") && static::shouldPaginate()) {
             $items = $q->paginate(max(min((int)(request()->get('per_page') ?? 100), 1000), 1));
         } else {
             $items = $q->get();
