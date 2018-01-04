@@ -63,7 +63,7 @@ trait Resource
             $isDate = false;
             foreach (is_array($rule)?$rule:[$rule] as $r) {
                 if (is_string($r) && strpos($r, 'date') !== false) {
-                    $values[$key] = Carbon::parse($values[$key]);
+                    $values[$key] = Carbon::parse($values[$key])->timezone('UTC');
                 }
             }
         }
