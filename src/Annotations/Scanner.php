@@ -45,6 +45,11 @@ function getLength($endpoint)
 class Scanner extends BaseRouteScanner
 {
     private $cache_key = "manifest";
+    private $permission_defintions = [];
+
+    private function setPermissionDefinitions( $definition ) {
+        $this->permission_definitions = $definition;
+    }
 
     public function getManifest($skipClass = false)
     {
@@ -56,6 +61,7 @@ class Scanner extends BaseRouteScanner
             $manifest = [
                 "uuid" => env('API_UUID'),
                 "prefix" => env('API_PREFIX'),
+                "permissions" => $this->permission_defintions,
                 "endpoints" => [],
             ];
             $endpoints = $this->getEndpointsInClasses($this->getReader());
@@ -91,6 +97,12 @@ class Scanner extends BaseRouteScanner
                     }
                     if ($method == 'GET' && isset($endpoint->cacheable) && $endpoint->cacheable) {
                         $route['cacheable'] = true;
+                    }
+                    if (isset($endpoint->permissions) && $endpoint->permissions) {
+                        $route['permissions'] = $endpoint->permissions;
+                    }
+                    if (isset($endpoint->permission_parameters) && $endpoint->permission_parameters) {
+                        $route['permission_parameters'] = $endpoint->permission_parameters;
                     }
                     $manifest['endpoints'][] = $route;
                     
