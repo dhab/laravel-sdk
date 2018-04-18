@@ -67,6 +67,35 @@ class User implements Authenticatable
             $this->id = $user['id'];
             $this->name = $user['name'];
             $this->email = $user['email'];
+            $this->permissions = $user['permissions'] ?? [];
         }
+    }
+
+    public function hasPermission($id, array $parameters = [])
+    {
+        foreach ($this->permissions as $permission => $limitations) {
+            // Only check permissions that are in the list
+            if ($permission !== $id) {
+                continue;
+            }
+
+            foreach ($limitations as $limitation => $values) {
+                // Only check parameters that are provided
+                if (!isset($parameters[$limitation])) {
+                    continue;
+                }
+
+                // If the parameter is not in the value list, permission denied
+                if (!in_array($parameters[$limitation], $values)) {
+                    return false;
+                }
+            }
+
+            // A matching permission was found, permission granted
+            return true;
+        }
+
+        // No matching permission found, permission denied
+        return false;
     }
 }

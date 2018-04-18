@@ -56,6 +56,7 @@ class Scanner extends BaseRouteScanner
             $manifest = [
                 "uuid" => env('API_UUID'),
                 "prefix" => env('API_PREFIX'),
+                "permissions" => config('permissions'),
                 "endpoints" => [],
             ];
             $endpoints = $this->getEndpointsInClasses($this->getReader());
@@ -91,6 +92,12 @@ class Scanner extends BaseRouteScanner
                     }
                     if ($method == 'GET' && isset($endpoint->cacheable) && $endpoint->cacheable) {
                         $route['cacheable'] = true;
+                    }
+                    if (isset($endpoint->permissions) && $endpoint->permissions) {
+                        $route['permissions'] = $endpoint->permissions;
+                    }
+                    if (isset($endpoint->permission_parameters) && $endpoint->permission_parameters) {
+                        $route['permission_parameters'] = $endpoint->permission_parameters;
                     }
                     $manifest['endpoints'][] = $route;
                     
