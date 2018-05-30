@@ -40,7 +40,10 @@ class User implements Authenticatable
 
 
 
-
+    public function user()
+    {
+        return $this;
+    }
 
 
     public function getId()
@@ -59,21 +62,29 @@ class User implements Authenticatable
     {
         return $this->logged_in;
     }
-    public function __construct($solidAuth, $error = false)
+    public function __construct($user, $error = false)
     {
-        $user = json_decode($solidAuth, true);
+        if (!is_array($user)) {
+            $user = json_decode($user, true);
+        }
+
         if ($user && $user['id']) {
             $this->logged_in = true;
             $this->id = $user['id'];
             $this->name = $user['name'];
             $this->email = $user['email'];
             $this->permissions = $user['permissions'] ?? [];
+            $this->access = $user['access'] ?? [];
         }
     }
 
-    public function hasPermission($id, array $parameters = [])
+    public function can($id, array $parameters = [])
     {
-        foreach ($this->permissions as $permission => $limitations) {
+        if (!isset($this->access['permissions'])) {
+            return false;
+        }
+
+        foreach ($this->access['permissions'] as $permission => $limitations) {
             // Only check permissions that are in the list
             if ($permission !== $id) {
                 continue;

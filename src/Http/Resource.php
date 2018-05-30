@@ -27,7 +27,12 @@ trait Resource
     protected static function query()
     {
         $class = static::getClass();
-        return $class::ordered()->with(static::getDefaultRelations());
+
+        if (in_array('Spatie\EloquentSortable\Sortable', class_implements($class))) {
+            return $class::ordered()->with(static::getDefaultRelations());
+        }
+
+        return $class::with(static::getDefaultRelations());
     }
 
     protected static function findOrFail($id)
@@ -48,9 +53,23 @@ trait Resource
     {
         if (method_exists(static::class, "getResponseClass")) {
             $response = static::getResponseClass();
-            return new $response($data);
+            $response = new $response($data);
         } else {
-            return new InstantiableModelResponse(static::getClass(), $data);
+            $response = new InstantiableModelResponse(static::getClass(), $data);
+        }
+
+        $class = static::getClass();
+        $gate = app(Gate::class);
+        if ($gate->getPolicyFor($class)) {
+            $gateWithUser = $gate->forUser(request()->user());
+            $headers = [
+                'X-Permissions' => json_encode([
+                    'create' => $gateWithUser->check('create', [$class]),
+                    'update' => $gateWithUser->check('update', [$class]),
+                    'delete' => $gateWithUser->check('delete', [$class]),
+                ])
+            ];
+            return $response->withHeaders($headers);
         }
     }
 
@@ -120,12 +139,17 @@ trait Resource
      */
     public function index()
     {
+        if (app(Gate::class)->getPolicyFor(static::getClass())) {
+            $this->authorize('view');
+        }
+
         $q = static::query();
         if (method_exists(static::class, "shouldPaginate") && static::shouldPaginate()) {
             $items = $q->paginate(max(min((int)(request()->get('per_page') ?? 100), 1000), 1));
         } else {
             $items = $q->get();
         }
+        
         return self::response($items);
     }
 
@@ -137,6 +161,11 @@ trait Resource
     public function show()
     {
         $item = static::findOrFail(static::getId());
+
+        if (app(Gate::class)->getPolicyFor(static::getClass())) {
+            $this->authorize('view', $item);
+        }
+
         return self::response($item);
     }
 
