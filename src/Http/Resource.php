@@ -140,7 +140,7 @@ trait Resource
     public function index()
     {
         if (app(Gate::class)->getPolicyFor(static::getClass())) {
-            $this->authorize('view');
+            $this->authorize('view', [static::getClass()]);
         }
 
         $q = static::query();
