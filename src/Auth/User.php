@@ -84,29 +84,66 @@ class User implements Authenticatable
             return false;
         }
 
-        foreach ($this->access['permissions'] as $permission => $limitations) {
-            // Only check permissions that are in the list
-            if ($permission !== $id) {
+        if (!isset($this->access['permissions'][$id])) {
+            return false;
+        }
+            
+        $limitations = $this->access['permissions'][$id];
+
+        foreach ($limitations as $limitation => $values) {
+            // Only check parameters that are provided
+            if (!isset($parameters[$limitation])) {
                 continue;
             }
 
-            foreach ($limitations as $limitation => $values) {
-                // Only check parameters that are provided
-                if (!isset($parameters[$limitation])) {
-                    continue;
-                }
-
-                // If the parameter is not in the value list, permission denied
-                if (!in_array($parameters[$limitation], $values)) {
-                    return false;
-                }
+            // If the parameter is not in the value list, permission denied
+            if (!in_array($parameters[$limitation], $values)) {
+                return false;
             }
-
-            // A matching permission was found, permission granted
-            return true;
         }
 
-        // No matching permission found, permission denied
-        return false;
+        // A matching permission was found, permission granted
+        return true;
+    }
+
+    public function hasRelation($relation, $group_id)
+    {
+        if (!isset($this->access['relations'])) {
+            return false;
+        }
+   
+        if (!isset($this->access[$relation])) {
+            return false;
+        }
+
+        return in_array($group_id, $this->access[$relation]);
+    }
+
+    public function hasRole($role, array $parameters = [])
+    {
+        if (!isset($this->access['roles'])) {
+            return false;
+        }
+
+        if (!isset($this->access['roles'][$id])) {
+            return false;
+        }
+            
+        $limitations = $this->access['roles'][$id];
+
+        foreach ($limitations as $limitation => $values) {
+            // Only check parameters that are provided
+            if (!isset($parameters[$limitation])) {
+                continue;
+            }
+
+            // If the parameter is not in the value list, permission denied
+            if (!in_array($parameters[$limitation], $values)) {
+                return false;
+            }
+        }
+
+        // A matching permission was found, permission granted
+        return true;
     }
 }
