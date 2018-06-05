@@ -71,6 +71,8 @@ trait Resource
             ];
             return $response->withHeaders($headers);
         }
+
+        return $response;
     }
 
     protected static function fillDefaultValues($values, $obj = false, $rules = [])
