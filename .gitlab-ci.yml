@@ -8,6 +8,6 @@ variables:
 
 unittests:
   stage: test
-  image: deriel/laravel:latest
+  image: dhab/devenv-laravel:latest
   script:
     - ./check.sh
