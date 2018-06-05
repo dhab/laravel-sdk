@@ -79,7 +79,7 @@ trait Resource
             if (!isset($values[$key])) {
                 // Special case to let values be unset
                 // All values not present in POST-data, that are nullable are set to null
-                if ($rule === 'nullable' || is_array($rule) && in_array('nullable', $rule)) {
+                if ($rule === 'unsettable' || is_array($rule) && in_array('unsettable', $rule)) {
                     $values[$key] = null;
                 }
 
