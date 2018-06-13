@@ -5,6 +5,7 @@ namespace DreamHack\SDK\Http\Responses;
 use Carbon\Carbon;
 use DreamHack\SDK\Contracts\Requestable;
 use DreamHack\SDK\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Http\Response as IlluminateResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -60,7 +61,7 @@ class Response extends IlluminateResponse
                         is_subclass_of($castType, InstantiableModelResponse::class)
                     )
                 ) {
-                    if (is_subclass_of($row, Model::class)) {
+                    if (is_subclass_of($row, Model::class) || is_subclass_of($row, EloquentModel::class)) {
                         if ($row->relationLoaded($field)) {
                             $value = $row->$field;
                             if ($value !== null) {
