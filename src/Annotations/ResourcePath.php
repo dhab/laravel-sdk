@@ -23,6 +23,7 @@ class ResourcePath extends BasePath
                 return 'get';
 
             case 'store':
+            case 'partialUpdate':
                 return 'post';
 
             case 'update':

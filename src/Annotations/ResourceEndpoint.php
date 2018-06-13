@@ -2,6 +2,7 @@
 
 namespace DreamHack\SDK\Annotations;
 
+use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Collective\Annotations\Routing\Annotations\Path;
 use Collective\Annotations\Routing\Annotations\ResourceEndpoint as BaseEndpoint;
@@ -14,12 +15,19 @@ class ResourceEndpoint extends BaseEndpoint
      *
      * @var array
      */
-    protected $customMethods = ['batch', 'batchDestroy'];
+    protected $customMethods = ['batch', 'batchDestroy', 'partialUpdate'];
     protected $customVerbs = [
         "batch" => "put",
-        "batchDestroy" => "post"
+        "batchDestroy" => "post",
+        "partialUpdate" => "post",
     ];
-    protected $methods = ['batch', 'batchDestroy', 'index', 'store', 'show', 'update', 'destroy'];
+    protected $customPaths = [
+        "batch" => "batch",
+        "batchDestroy" => "batchDestroy",
+        "partialUpdate" => null,
+    ];
+
+    protected $methods = ['batch', 'batchDestroy', 'index', 'store', 'show', 'update', 'partialUpdate', 'destroy'];
 
     /**
      * Create a new route definition instance.
@@ -74,13 +82,18 @@ class ResourceEndpoint extends BaseEndpoint
     {
         foreach ($this->getIncludedMethods() as $method) {
             if ($this->isCustomMethod($method)) {
+                list($name, $prefix) = $this->getResourcePrefix($this->name);
+                $singular_name = Str::singular($name);
+                $as = $this->as ?? $name;
+                $path = $this->customPaths[$method] ? $this->customPaths[$method] : "{{$singular_name}}";
+
                 $path = new Path(
-                    $this->customVerbs[$method],
-                    "",
-                    $method,
-                    $this->as.".".$this->getNameOf($method),
-                    [],
-                    []
+                    $this->customVerbs[$method],            // verb
+                    "",                                     // domain
+                    $path,                                  // path
+                    $as.".".$this->getNameOf($method),      // as
+                    [],                                     // middleware
+                    []                                      // where
                 );
                 $path->method = $method;
                 $this->paths[] = $path;
@@ -175,5 +188,21 @@ class ResourceEndpoint extends BaseEndpoint
     \'where\' => [%s],
     \'domain\' => %s,
 ]);';
+    }
+
+    /**
+     * Extract the resource and prefix from a resource name.
+     *
+     * @param  string  $name
+     * @return array
+     */
+    protected function getResourcePrefix($name)
+    {
+        $segments = explode('/', $name);
+        // To get the prefix, we will take all of the name segments and implode them on
+        // a slash. This will generate a proper URI prefix for us. Then we take this
+        // last segment, which will be considered the final resources name we use.
+        $prefix = implode('/', array_slice($segments, 0, -1));
+        return [end($segments), $prefix];
     }
 }

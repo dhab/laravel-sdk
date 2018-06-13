@@ -208,12 +208,31 @@ trait Resource
      */
     public function update(Request $request)
     {
+        return $this->doUpdate($request, false);
+    }
+
+    /**
+     * Partly update an existing record of the resource
+     * @param  Request $request
+     * @param  string $id
+     * @return DreamHack\SDK\Http\Responses\InstantiableModelResponse
+     */
+    public function partialUpdate(Request $request)
+    {
+        return $this->doUpdate($request, true);
+    }
+
+    private function doUpdate(Request $request, $partial = false)
+    {
         $item = static::findOrFail(static::getId());
 
         $rules = static::getValidationRules();
         $this->validate($request, $rules);
         $validated = collect($request->all())->only(array_keys($rules))->all();
         $validated = static::fillDefaultValues($validated, $item, $rules);
+        if ($partial) {
+            $validated = array_intersect_key($request->all(), $validated); // Only differance between update and partialUpdate
+        }
         $item->fill($validated);
         if (app(Gate::class)->getPolicyFor(static::getClass())) {
             $this->authorize('update', $item);
