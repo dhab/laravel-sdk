@@ -112,11 +112,11 @@ class User implements Authenticatable
             return false;
         }
    
-        if (!isset($this->access[$relation])) {
+        if (!isset($this->access['relations'][$relation])) {
             return false;
         }
 
-        return in_array($group_id, $this->access[$relation]);
+        return in_array($group_id, $this->access['relations'][$relation]);
     }
 
     public function hasRole($role, array $parameters = [])
