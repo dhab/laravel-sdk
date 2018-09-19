@@ -52,7 +52,7 @@ trait DhidPermissions
             Log::debug("checkPermissions: $permission - FAILED (not all circumstances fullfilled, ".implode(',', $notFullfilledCircumstances).")", $circumstances);
             return false;
         }
-
+        return true;
         Log::debug("checkPermissions: $permission - ACCEPTED", $circumstances);
     }
 }
