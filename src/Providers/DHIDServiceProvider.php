@@ -24,8 +24,15 @@ class DHIDServiceProvider extends ServiceProvider
     {
         $this->app->singleton(DHID::class, function ($app) {
             $config = [
-                'base_uri' => env('API_BASE_URL', 'https://api.dreamhack.com')
+                'base_uri' => env('API_BASE_URL', 'https://api.dreamhack.com'),
             ];
+
+            if (env('API_CLIENT_ID') && env('API_SECRET')) {
+                $config['auth'] = [
+                    env('API_CLIENT_ID'),
+                    hash_hmac('sha256', env('API_CLIENT_ID'), env('API_SECRET'))
+                ];
+            }
             return new DHID($config);
         });
         $client = $this->app->make(DHID::class);
