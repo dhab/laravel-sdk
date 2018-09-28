@@ -43,14 +43,14 @@ class DHID extends Client
      */
     public function sendUpdates()
     {
-        if (!env('SOCKET_BASE_URL')) {
+        if (!config('dhid.socket_base_url')) {
             return;
         }
 
         foreach ($this->updates as $url => $bool) {
             if ($bool) {
                 try {
-                    Guzzle::request('GET', env('SOCKET_BASE_URL').'update'.$url);
+                    Guzzle::request('GET', config('dhid.socket_base_url').'update'.$url);
                 } catch (Exception $e) {
                     Log::info("Exception while updating url: ".$url.", ".$e->getMessage());
                 }

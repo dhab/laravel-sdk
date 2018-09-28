@@ -14,22 +14,7 @@ After installing the DreamHack Laravel SDK, in your `config/app.php` configurati
 	DreamHack\SDK\Providers\SocialiteServiceProvider::class,
 ],
 ```
-Configuration is normaly saved in the `.env` file. Add the following code in your `config/services.php` file to relay the parameters to the DHID Socialite service provider.
-
-```php
-    'dhid' => [
-        'client_id' => env('DHID_CLIENT'),
-        'client_secret' => env('DHID_SECRET'),
-        'redirect' => env('DHID_REDIRECT')
-    ],  
-```
-And add the following variables to your `.env` file. Make sure to populate them with correct information. 
-
-```bash
-DHID_CLIENT=
-DHID_SECRET=
-DHID_REDIRECT=http://---/login/dhid/callback
-```
+Run `php artisan vendor:publish --provider="DreamHack\SDK\Providers\DHIDServiceProvider"` to get a template config and change values in there, or in your .env file.
 
 ### Database
 To run the database migrations added by the service provider run

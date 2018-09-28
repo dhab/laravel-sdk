@@ -15,6 +15,9 @@ class DHIDServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->publishes([
+            __DIR__.'/../../config/dhid.php' => config_path('dhid.php'),
+        ]);
     }
 
     /**
@@ -24,13 +27,13 @@ class DHIDServiceProvider extends ServiceProvider
     {
         $this->app->singleton(DHID::class, function ($app) {
             $config = [
-                'base_uri' => env('API_BASE_URL', 'https://api.dreamhack.com'),
+                'base_uri' => config('config.api_base_url'),
             ];
 
-            if (env('API_CLIENT_ID') && env('API_SECRET')) {
+            if (config('dhid.api_client_id') && config('dhid.api_secret')) {
                 $config['auth'] = [
-                    env('API_CLIENT_ID'),
-                    hash_hmac('sha256', env('API_CLIENT_ID'), env('API_SECRET'))
+                    config('dhid.api_client_id'),
+                    hash_hmac('sha256', config('dhid.api_client_id'), config('dhid.api_secret'))
                 ];
             }
             return new DHID($config);

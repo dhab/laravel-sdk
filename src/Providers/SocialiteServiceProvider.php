@@ -38,7 +38,11 @@ class SocialiteServiceProvider extends ServiceProvider
         $socialite->extend(
             'dhid',
             function ($app) use ($socialite) {
-                $config = $app['config']['services.dhid'];
+                $config = [
+                    'client_id' => config('dhid.dhid_client'),
+                    'client_secret' => config('dhid.dhid_secret'),
+                    'redirect' => config('dhid.dhid_redirect'),
+                ];
                 return $socialite->buildProvider(SocialiteProvider::class, $config);
             }
         );

@@ -54,8 +54,8 @@ class Scanner extends BaseRouteScanner
         }
         if (!$manifest) {
             $manifest = [
-                "uuid" => env('API_UUID'),
-                "prefix" => env('API_PREFIX'),
+                "uuid" => config('dhid.api_uuid'),
+                "prefix" => config('dhid.api_prefix'),
                 "permissions" => config('permissions'),
                 "endpoints" => [],
             ];
@@ -158,7 +158,7 @@ class Scanner extends BaseRouteScanner
     public function getRAMLManifest($skipClass = false)
     {
 
-        $version = env('VERSION', 'dev');
+        $version = config('dhid.version');
         if ($version == 'dev') {
             // Try to get the git tag/version
             $v = exec('git describe  --tags');
