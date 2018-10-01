@@ -43,12 +43,15 @@ class API extends Client
      * Append a row in user_logs in ID, type is a unique identifier for your
      * thing, and data is serialized to json before it's saved.
      */
-    public static function Userlog($type, $data) {
+    public static function Userlog($type, $data)
+    {
         $request = request();
         $auth = $request->header('Authorization');
 
         // Sanity-check, are we even logged in?
-        if (!$auth) return;
+        if (!$auth) {
+            return;
+        }
 
         return Guzzle::request(
             'POST',
