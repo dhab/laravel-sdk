@@ -27,7 +27,7 @@ class DHController extends BaseController
     {
         foreach ($endpoints->getAllPaths() as $path) {
             $path->path = $this->trimPath(
-                (isset($path->version)?$path->version:'0')."/".config('dhid.api_prefix'),
+                ($path->version ?? '0')."/".config('dhid.api_prefix'),
                 $path->path
             );
         }
