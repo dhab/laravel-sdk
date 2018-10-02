@@ -27,7 +27,7 @@ class DHIDServiceProvider extends ServiceProvider
     {
         $this->app->singleton(DHID::class, function ($app) {
             $config = [
-                'base_uri' => config('config.api_base_url'),
+                'base_uri' => config('dhid.api_base_url'),
             ];
 
             if (config('dhid.api_client_id') && config('dhid.api_secret')) {
