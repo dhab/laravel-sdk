@@ -38,4 +38,33 @@ class API extends Client
 
         return json_decode($res->getBody());
     }
+
+    /**
+     * Append a row in user_logs in ID, type is a unique identifier for your
+     * thing, and data is serialized to json before it's saved.
+     */
+    public static function Userlog($type, $data)
+    {
+        $request = request();
+        $auth = $request->header('Authorization');
+
+        // Sanity-check, are we even logged in?
+        if (!$auth) {
+            return;
+        }
+
+        return Guzzle::request(
+            'POST',
+            self::getUrl().'/1/identity/users/log',
+            [
+                "json" => [
+                    "type" => $type,
+                    "data" => $data,
+                ],
+                "headers" => [
+                    "Authorization" => $auth,
+                ],
+            ]
+        );
+    }
 }
