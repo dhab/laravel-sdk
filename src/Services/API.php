@@ -15,7 +15,7 @@ class API extends Client
 {
     private static function getUrl()
     {
-        return env('API_INTERNAL_BASE_URL', 'https://api.dreamhack.com');
+        return config('dhid.api_internal_base_url');
     }
 
     /**
