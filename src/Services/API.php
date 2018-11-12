@@ -67,4 +67,33 @@ class API extends Client
             ]
         );
     }
+
+    /**
+     * Maybe notify a user for getting an achievement
+     */
+    public static function AchievementNotify($userAchievement)
+    {
+        $request = request();
+        $auth = $request->header('Authorization');
+
+        // Sanity-check, are we even logged in?
+        if (!$auth) {
+            return;
+        }
+
+        $userAchievement->load('achievement');
+
+        return Guzzle::request(
+            'POST',
+            self::getUrl().'/1/content/notifications/achievement',
+            [
+                "json" => [
+                    "userAchievement" => $userAchievement,
+                ],
+                "headers" => [
+                    "Authorization" => $auth,
+                ],
+            ]
+        );
+    }
 }
