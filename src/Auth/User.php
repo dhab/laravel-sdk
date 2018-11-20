@@ -68,7 +68,7 @@ class User implements Authenticatable
             $user = json_decode($user, true);
         }
 
-        if ($user && $user['id']) {
+        if ($user && isset($user['id'])) {
             $this->logged_in = true;
             $this->id = $user['id'];
             $this->name = $user['name'];
