@@ -96,4 +96,37 @@ class API extends Client
             ]
         );
     }
+
+    /**
+     * Update email for a user's orders
+     */
+    public static function updateOrderEmail()
+    {
+        $request = request();
+        $auth = $request->header('Authorization');
+
+        if (!$auth) {
+            return;
+        }
+
+        $res = Guzzle::request(
+            'POST',
+            self::getUrl().'/1/content/orders/update_email',
+            [
+                "json" => [
+                    "test" => "foo",
+                ],
+                "headers" => [
+                    "Authorization" => $auth,
+                ],
+            ]
+        );
+
+        if ($res->getStatusCode() !== 200) {
+            // Throw something?
+            return false;
+        }
+
+        return true;
+    }
 }

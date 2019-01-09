@@ -13,7 +13,7 @@ use Validator;
 
 trait Resource
 {
-    public abstract static function getClass();
+    abstract public static function getClass();
 
     public static function getDefaultRelations()
     {
