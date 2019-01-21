@@ -129,4 +129,25 @@ class API extends Client
 
         return true;
     }
+
+    /**
+     * Award an achievement to a user, make sure API_CLIENT_ID and API_SECRET are set correctly
+     */
+    public static function awardAchievement($achievement_id, $user_id)
+    {
+        $res = Guzzle::request(
+            'POST',
+            self::getUrl()."/1/qvp/achievements/{$achievement_id}/award",
+            [
+                "json" => [
+                    "user_id" => $user_id,
+                ],
+                'auth' => [
+                    config('dhid.api_client_id'),
+                    hash_hmac('sha256', config('dhid.api_client_id'), config('dhid.api_secret'))
+                ],
+            ]
+        );
+        // Handle errors?
+    }
 }
