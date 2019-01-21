@@ -76,6 +76,13 @@ class User implements Authenticatable
             $this->permissions = $user['permissions'] ?? [];
             $this->access = $user['access'] ?? [];
         }
+
+        if ($user && isset($user['service'])) {
+            $this->logged_in = true;
+            $this->id = $user['service']['id'];
+            $this->access = $user['access'] ?? [];
+            $this->permissions = $user['access']['permissions'] ?? [];
+        }
     }
 
     public function can($id, array $parameters = [])
