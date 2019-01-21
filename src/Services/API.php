@@ -4,7 +4,7 @@ namespace DreamHack\SDK\Services;
 
 use DreamHack\SDK\Facades\Guzzle;
 use GuzzleHttp\Client;
-use Log;
+use DHID;
 
 /**
  *
@@ -135,16 +135,12 @@ class API extends Client
      */
     public static function awardAchievement($achievement_id, $user_id)
     {
-        $res = Guzzle::request(
+        $res = DHID::request(
             'POST',
-            self::getUrl()."/1/qvp/achievements/{$achievement_id}/award",
+            "/1/qvp/achievements/{$achievement_id}/award",
             [
                 "json" => [
                     "user_id" => $user_id,
-                ],
-                'auth' => [
-                    config('dhid.api_client_id'),
-                    hash_hmac('sha256', config('dhid.api_client_id'), config('dhid.api_secret'))
                 ],
             ]
         );
