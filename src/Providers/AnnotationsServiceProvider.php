@@ -5,6 +5,7 @@ use Collective\Annotations\AnnotationsServiceProvider as ServiceProvider;
 use Collective\Annotations\Routing\Annotations\Scanner as RouteScanner;
 use DreamHack\SDK\Annotations\Scanner as ManifestScanner;
 use DreamHack\SDK\Http\Controllers\ManifestController;
+use DreamHack\SDK\Http\Controllers\UserdataController;
 
 class AnnotationsServiceProvider extends ServiceProvider
 {
@@ -39,6 +40,7 @@ class AnnotationsServiceProvider extends ServiceProvider
      */
     protected $scanRoutes = [
         ManifestController::class,
+        UserdataController::class,
     ];
 
     /**
