@@ -249,7 +249,8 @@ trait BaseUserdata
      *
      * @param object User with keys (id, email)
      */
-    protected function getData($user) {
+    protected function getData($user)
+    {
         $selects = $this->getSelectQueries($user);
         $results = $this->selectMany($selects);
         $cleaned = $this->cleanResults($results);
