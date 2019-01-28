@@ -2,7 +2,7 @@
 
 namespace DreamHack\SDK\Commands;
 
-use DreamHack\SDK\Traits\BaseUserData;
+use DreamHack\SDK\Traits\BaseUserdata;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
