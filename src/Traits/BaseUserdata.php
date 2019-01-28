@@ -35,7 +35,7 @@ trait BaseUserdata
 
         return join(" OR ", array_map(function ($value) use ($vm, $user) {
               return $vm->template($value, $user);
-        }, $where));
+        }, $where ?? ["1 = 1"]));
     }
 
     /**
