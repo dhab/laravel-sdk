@@ -61,7 +61,8 @@ class ScheduleDeleteData extends Command
 
         $queries = [];
         foreach (config('userdata.schedule') as $table => $data) {
-            $query = sprintf("DELETE FROM %s WHERE %s AND %s",
+            $query = sprintf(
+                "DELETE FROM %s WHERE %s AND %s",
                 $table,
                 $this->transformWhere($data['where'], $dummyUser),
                 $this->transformWhen($data['when']),
