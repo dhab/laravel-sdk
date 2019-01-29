@@ -237,7 +237,9 @@ trait BaseUserdata
                     $ret[$table] = $rows;
                 }
             } else {
+                DB::getSchemaBuilder()->disableForeignKeyConstraints();
                 DB::delete($query);
+                DB::getSchemaBuilder()->enableForeignKeyConstraints();
             }
         }
 

@@ -15,6 +15,27 @@ class UserdataController extends BaseController
     use BaseUserdata;
 
     /**
+     * Since email is very user controlled and goes into a LIKE most of the
+     * time, we check it a bit extra. Email validator in ID should catch
+     * these, but better be safe than sorry.
+     *
+     * Errors will end up in failed_jobs in ID, notification sent to slack.
+     *
+     * @param string
+     * @return string
+     */
+    private function verifyEmail($email)
+    {
+        if (strpos($email, "%") >= 0) {
+            return "";
+        }
+        if (strpos($email, "'") >= 0) {
+            return "";
+        }
+        return $email;
+    }
+
+    /**
      * Display a listing of the resource.
      * @Post("export", as="userdata.export")
      * @Version("1")
@@ -28,11 +49,11 @@ class UserdataController extends BaseController
         
         // 2. Get input (need $user->id, $user->email) or change base
         $user = new \stdClass;
-        $user->email = $request->input('email');
+        $user->email = $this->verifyEmail($request->input('email'));
         $user->id = $request->input('user_id');
 
         if (empty($user->id) || empty($user->email)) {
-            return response()->json([], 403);
+            return response()->json([], 401);
         }
 
         // 3. Get data and return it.
@@ -53,7 +74,7 @@ class UserdataController extends BaseController
         
         // 2. Get input (need $user->id, $user->email) or change base
         $user = new \stdClass;
-        $user->email = $request->input('email');
+        $user->email = $this->verifyEmail($request->input('email'));
         $user->id = $request->input('user_id');
 
         $dryRun = $request->input('dry_run');
