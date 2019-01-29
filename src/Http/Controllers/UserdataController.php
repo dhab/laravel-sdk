@@ -26,10 +26,10 @@ class UserdataController extends BaseController
      */
     private function verifyEmail($email)
     {
-        if (strpos($email, "%") >= 0) {
+        if (strpos($email, "%") !== false) {
             return "";
         }
-        if (strpos($email, "'") >= 0) {
+        if (strpos($email, "'") !== false) {
             return "";
         }
         return $email;
