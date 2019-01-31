@@ -57,4 +57,28 @@ class DHID extends Client
             }
         }
     }
+
+    public function notifyUser(string $userId, string $type, $data = null) {
+       return $this->post('/1/socket/push', ['form_params' => [
+          'userId' => $userId,
+          'type' => $type,
+          'data' => $data,
+       ]]);
+    }
+
+    public function notifyToken(string $token, string $type, $data = null) {
+       return $this->post('/1/socket/push', ['form_params' => [
+          'token' => $token,
+          'type' => $type,
+          'data' => $data,
+       ]]);
+    }
+
+    public function notifyChannel(string $channel, string $type, $data = null) {
+       return $this->post('/1/socket/push', ['form_params' => [
+          'channel' => $channel,
+          'type' => $type,
+          'data' => $data,
+       ]]);
+    }
 }
