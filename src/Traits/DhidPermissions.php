@@ -38,21 +38,21 @@ trait DhidPermissions
     {
         $access = self::getDhid('access');
         if (!isset($access['permissions'])) {
-            Log::debug("checkPermissions: $permission - FAILED (no permissions key)", $circumstances);
+            //Log::debug("checkPermissions: $permission - FAILED (no permissions key)", $circumstances);
             return false;
         }
 
         if (!isset($access['permissions'][$permission])) {
-            Log::debug("checkPermissions: $permission - FAILED (permission is missing)", $circumstances);
+            //Log::debug("checkPermissions: $permission - FAILED (permission is missing)", $circumstances);
             return false;
         }
 
         $notFullfilledCircumstances = array_keys(array_diff_assoc($access['permissions'][$permission], $circumstances));
         if (count($notFullfilledCircumstances) !== 0) {
-            Log::debug("checkPermissions: $permission - FAILED (not all circumstances fullfilled, ".implode(',', $notFullfilledCircumstances).")", $circumstances);
+            //Log::debug("checkPermissions: $permission - FAILED (not all circumstances fullfilled, ".implode(',', $notFullfilledCircumstances).")", $circumstances);
             return false;
         }
-        Log::debug("checkPermissions: $permission - ACCEPTED", $circumstances);
+        //Log::debug("checkPermissions: $permission - ACCEPTED", $circumstances);
         return true;
     }
 }
