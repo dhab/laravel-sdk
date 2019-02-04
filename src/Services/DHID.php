@@ -76,6 +76,15 @@ class DHID extends Client
         ])]);
     }
 
+    public function notifySession(string $session, string $type, $data = null, array $options = [])
+    {
+        return $this->post('/1/socket/push', ['form_params' => array_merge($options, [
+          'session' => $session,
+          'type' => $type,
+          'data' => $data,
+        ])]);
+    }
+
     public function notifyChannel(string $channel, string $type, $data = null, array $options = [])
     {
         return $this->post('/1/socket/push', ['form_params' => array_merge($options, [
