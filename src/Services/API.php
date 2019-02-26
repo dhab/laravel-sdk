@@ -5,6 +5,7 @@ namespace DreamHack\SDK\Services;
 use DreamHack\SDK\Facades\Guzzle;
 use GuzzleHttp\Client;
 use DHID;
+use Log;
 
 /**
  *
@@ -135,15 +136,19 @@ class API extends Client
      */
     public static function awardAchievement($achievement_id, $user_id)
     {
-        $res = DHID::request(
-            'POST',
-            "/1/qvp/achievements/{$achievement_id}/award",
-            [
+        try {
+            $res = DHID::request(
+                'POST',
+                "/1/qvp/achievements/{$achievement_id}/award",
+                [
                 "json" => [
                     "user_id" => $user_id,
                 ],
-            ]
-        );
-        // Handle errors?
+                ]
+            );
+        } catch (\Exception $e) {
+            // Ignore any error that might come up, but log it.
+            Log::error('Failed to send internal request', ["exception" => $e]);
+        }
     }
 }
