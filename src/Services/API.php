@@ -137,16 +137,16 @@ class API extends Client
     public static function awardAchievement($achievement_id, $user_id)
     {
         try {
-        $res = DHID::request(
-            'POST',
-            "/1/qvp/achievements/{$achievement_id}/award",
-            [
+            $res = DHID::request(
+                'POST',
+                "/1/qvp/achievements/{$achievement_id}/award",
+                [
                 "json" => [
                     "user_id" => $user_id,
                 ],
-            ]
-        );
-        } catch(\Exception $e) {
+                ]
+            );
+        } catch (\Exception $e) {
             // Ignore any error that might come up, but log it.
             Log::error('Failed to send internal request', ["exception" => $e]);
         }
