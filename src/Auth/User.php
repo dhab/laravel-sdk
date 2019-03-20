@@ -5,6 +5,7 @@ namespace DreamHack\SDK\Auth;
 use DreamHack\SDK\Exceptions\UnauthorizedException;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Carbon\Carbon;
 
 class User implements Authenticatable
 {
@@ -85,7 +86,7 @@ class User implements Authenticatable
         }
     }
 
-    public function can($id, array $parameters = [])
+    public function can($id, array $context = [])
     {
         if (!isset($this->access['permissions'])) {
             return false;
@@ -94,23 +95,44 @@ class User implements Authenticatable
         if (!isset($this->access['permissions'][$id])) {
             return false;
         }
-            
-        $limitations = $this->access['permissions'][$id];
+    
+        $blocks = $this->access['permissions'][$id];
 
-        foreach ($limitations as $limitation => $values) {
-            // Only check parameters that are provided
-            if (!isset($parameters[$limitation])) {
-                continue;
+        // No limitations on the permission, permission granted
+        if (count($blocks) === 0) {
+            return true;
+        }
+
+        foreach ($blocks as $block) {
+            $result = true;
+            foreach ($block as $parameter => $value) {
+                switch ($parameter) {
+                    case 'from_time':
+                        $ts = Carbon::parse($value);
+                        $result = $result && $ts->isPast();
+                        break;
+                    case 'to_time':
+                        $ts = Carbon::parse($value);
+                        $result = $result && $ts->isFuture();
+                        break;
+                    default:
+                        // If parameter is missing from the context, permission denied
+                        if (!isset($context[$parameter])) {
+                            $result = false;
+                        } else {
+                            $result = $result && ($value == $context[$parameter]);
+                        }
+                }
             }
 
-            // If the parameter is not in the value list, permission denied
-            if (!in_array($parameters[$limitation], $values)) {
-                return false;
+            // A matching permission was found, permission granted
+            if ($result) {
+                return true;
             }
         }
 
-        // A matching permission was found, permission granted
-        return true;
+        // No maching permission was found, permission denied
+        return false;
     }
 
     public function hasRelation($relation, $group_id)
@@ -126,31 +148,18 @@ class User implements Authenticatable
         return in_array($group_id, $this->access['relations'][$relation]);
     }
 
-    public function hasRole($role, array $parameters = [])
+    public function hasRole($role)
     {
         if (!isset($this->access['roles'])) {
             return false;
         }
 
-        if (!isset($this->access['roles'][$id])) {
+        if (!isset($this->access['roles'][$role])) {
             return false;
         }
-            
-        $limitations = $this->access['roles'][$id];
+        print_r($role);
 
-        foreach ($limitations as $limitation => $values) {
-            // Only check parameters that are provided
-            if (!isset($parameters[$limitation])) {
-                continue;
-            }
-
-            // If the parameter is not in the value list, permission denied
-            if (!in_array($parameters[$limitation], $values)) {
-                return false;
-            }
-        }
-
-        // A matching permission was found, permission granted
+        // A matching role was found
         return true;
     }
 }
