@@ -135,7 +135,7 @@ class User implements Authenticatable
         return false;
     }
 
-    public function hasRelation($relation, $group_id)
+    public function hasRelation($relation, $group_id = null)
     {
         if (!isset($this->access['relations'])) {
             return false;
@@ -143,6 +143,10 @@ class User implements Authenticatable
    
         if (!isset($this->access['relations'][$relation])) {
             return false;
+        }
+
+        if ( $group_id == null ) { // No group was specified, then any group will suffice
+            return true;
         }
 
         return in_array($group_id, $this->access['relations'][$relation]);
@@ -157,7 +161,6 @@ class User implements Authenticatable
         if (!isset($this->access['roles'][$role])) {
             return false;
         }
-        print_r($role);
 
         // A matching role was found
         return true;

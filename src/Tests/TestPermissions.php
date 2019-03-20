@@ -160,6 +160,9 @@ trait TestPermissions
         $this->assertFalse($user->hasRelation('TL', 'group 2'));
         $this->assertFalse($user->hasRelation('TL', 'group 3'));
         $this->assertTrue($user->hasRelation('TL', 'group 4'));
+
+        $this->assertTrue($user->hasRelation('TL'));
+        $this->assertFalse($user->hasRelation('notTL'));
     }
 
     public function testUserRole()
