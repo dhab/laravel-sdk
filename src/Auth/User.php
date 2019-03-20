@@ -145,7 +145,7 @@ class User implements Authenticatable
             return false;
         }
 
-        if ( $group_id == null ) { // No group was specified, then any group will suffice
+        if ($group_id == null) { // No group was specified, then any group will suffice
             return true;
         }
 
