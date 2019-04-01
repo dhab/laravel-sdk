@@ -58,39 +58,67 @@ class DHID extends Client
         }
     }
 
-    public function notifyUser(string $userId, string $type, $data = null, array $options = [])
+    // For convenience, get a useable token from the request.
+    //
+    // For all services but ID this should be in the Authorization-header, but
+    // on ID (especially login/logout) it might be in a posted/getted parameter.
+    private function getTokenFromRequest($request)
     {
-        return $this->post('/1/socket/push', ['form_params' => array_merge($options, [
-          'userId' => $userId,
-          'type' => $type,
-          'data' => $data,
-        ])]);
+        return $request->input('token') ?? $request->bearerToken();
     }
 
-    public function notifyToken(string $token, string $type, $data = null, array $options = [])
+    private function sendNotificationToSocket($to, $json, $token = null)
     {
-        return $this->post('/1/socket/push', ['form_params' => array_merge($options, [
-          'token' => $token,
-          'type' => $type,
-          'data' => $data,
-        ])]);
+        if (!$token) {
+            $token = $this->getTokenFromRequest(request());
+        }
+
+        return $this->post('/1/socket/push/'.$to, [
+            'auth' => null, // Override default config for DHID singleton
+            'json' => $json,
+            'headers' => [
+                'Authorization' => $token, // Otherwise basic auth will be used
+            ]
+        ]);
     }
 
-    public function notifySession(string $session, string $type, $data = null, array $options = [])
+    public function notifyUser(string $user, string $type, $data = null, array $options = [], $token = null)
     {
-        return $this->post('/1/socket/push', ['form_params' => array_merge($options, [
-          'session' => $session,
-          'type' => $type,
-          'data' => $data,
-        ])]);
+        return $this->sendNotificationToSocket("user", [
+            'options' => $options,
+            'user' => $user,
+            'type' => $type,
+            'data' => $data,
+        ], $token);
     }
 
-    public function notifyChannel(string $channel, string $type, $data = null, array $options = [])
+    public function notifyToken(string $toToken, string $type, $data = null, array $options = [], $token = null)
     {
-        return $this->post('/1/socket/push', ['form_params' => array_merge($options, [
-          'channel' => $channel,
-          'type' => $type,
-          'data' => $data,
-        ])]);
+        return $this->sendNotificationToSocket("token", [
+            'options' => $options,
+            'token' => $toToken,
+            'type' => $type,
+            'data' => $data,
+        ], $token);
+    }
+
+    public function notifySession(string $session, string $type, $data = null, array $options = [], $token = null)
+    {
+        return $this->sendNotificationToSocket("session", [
+            'options' => $options,
+            'session' => $session,
+            'type' => $type,
+            'data' => $data,
+        ], $token);
+    }
+
+    public function notifyChannel(string $channel, string $type, $data = null, array $options = [], $token = null)
+    {
+        return $this->sendNotificationToSocket("channel", [
+            'options' => $options,
+            'channel' => $channel,
+            'type' => $type,
+            'data' => $data,
+        ], $token);
     }
 }
