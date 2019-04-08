@@ -121,4 +121,16 @@ class DHID extends Client
             'data' => $data,
         ], $token);
     }
+
+    public function lookupUser($id)
+    {
+        $res = $this->get('/1/identity/users/'.$id);
+
+        if ($res->getStatusCode() !== 200) {
+            return false;
+        }
+
+        return json_decode($res->getBody(), true);
+    }
+
 }
