@@ -132,5 +132,4 @@ class DHID extends Client
 
         return json_decode($res->getBody(), true);
     }
-
 }
