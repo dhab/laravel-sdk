@@ -22,6 +22,19 @@ trait Resource
     }
 
     /**
+     * Get a list of relations to ->sync()
+     *
+     * Expects an array of "releation name" => "primary key of relation"
+     */
+    public static function getSyncRelations()
+    {
+        $class = static::getClass();
+        return method_exists($class, 'getSyncRelations')
+            ? $class::getSyncRelations()
+            : [];
+    }
+
+    /**
      * Get base request for fetching resource.
      */
     protected static function query()
@@ -190,6 +203,16 @@ trait Resource
         if (!$item->save()) {
             // handle db error
         }
+
+        foreach (static::getSyncRelations() as $relation => $key) {
+            $item->$relation()->sync(
+                collect($request->input($relation))
+                    ->map(function ($item) use ($key) {
+                        return $item[$key];
+                    })
+            );
+        }
+
         $item->load(static::getDefaultRelations());
         return self::response($item);
     }
@@ -234,6 +257,16 @@ trait Resource
         if (!$item->save()) {
             // handle db error
         }
+
+        foreach (static::getSyncRelations() as $relation => $key) {
+            $item->$relation()->sync(
+                collect($request->input($relation))
+                    ->map(function ($item) use ($key) {
+                        return $item[$key];
+                    })
+            );
+        }
+
         $item->load(static::getDefaultRelations());
         return self::response($item);
     }
