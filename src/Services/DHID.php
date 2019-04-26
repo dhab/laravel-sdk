@@ -79,8 +79,8 @@ class DHID extends Client
         ];
 
         if ($token) {
+            $params['auth'] = null; // Override default config for DHID singleton
             $params['headers'] = [
-                'auth' => null, // Override default config for DHID singleton
                 'Authorization' => $token, // Otherwise basic auth will be used
             ];
         }
