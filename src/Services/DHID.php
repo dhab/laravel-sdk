@@ -72,14 +72,20 @@ class DHID extends Client
         if (!$token) {
             $token = $this->getTokenFromRequest(request());
         }
-
-        return $this->post('/1/socket/push/'.$to, [
-            'auth' => null, // Override default config for DHID singleton
+        
+        $params = [
             'json' => $json,
-            'headers' => [
+
+        ];
+
+        if ($token) {
+            $params['auth'] = null; // Override default config for DHID singleton
+            $params['headers'] = [
                 'Authorization' => $token, // Otherwise basic auth will be used
-            ]
-        ]);
+            ];
+        }
+
+        return $this->post('/1/socket/push/'.$to, $params);
     }
 
     public function notifyUser(string $user, string $type, $data = null, array $options = [], $token = null)
