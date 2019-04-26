@@ -7,16 +7,10 @@
         "issues": "https://git.dreamhack.se/dhid/laravel-sdk/issues",
         "source": "https://git.dreamhack.se/dhid/laravel-sdk"
     },
-    "repositories": [
-        {
-            "type": "git",
-            "url": "https://github.com/johntimothybailey/annotations"
-        }
-    ],
     "require": {
         "illuminate/database": "5.7.*",
         "ramsey/uuid": "^3.3",
-        "laravelcollective/annotations": "5.7.x-dev as 5.7.0",
+        "laravelcollective/annotations": "5.7.*",
         "guzzlehttp/guzzle": "^6.2",
         "symfony/yaml": "^3.2.8",
         "fzaninotto/faker": "^1.6",
