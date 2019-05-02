@@ -65,7 +65,7 @@ class ScheduleDeleteData extends Command
                 "DELETE FROM %s WHERE %s AND %s",
                 $table,
                 $this->transformWhere($data['where'], $dummyUser),
-                $this->transformWhen($data['when']),
+                $this->transformWhen($data['when'])
             );
             $queries[] = [$table => $query];
         }
