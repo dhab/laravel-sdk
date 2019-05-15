@@ -122,6 +122,33 @@ class DHID extends Client
         ], $token);
     }
 
+    public function Mfa(string $type, $userId, $title)
+    {
+        $request = [
+            'json' => [
+                'user' => $userId,
+                'title' => $title,
+                'action' => $type,
+                'cookies' => $_COOKIE,
+            ],
+        ];
+
+        $bearer = request()->bearerToken();
+        if ($bearer) { // Forward the JWT token (used for every service except ID)
+            $request['auth'] = null; // Override default config for DHID singleton
+            $request['headers'] = [
+                'Authorization' => 'Bearer '.$bearer, // Otherwise basic auth will be used
+            ];
+        } elseif ($_COOKIE) {
+            $request['json']['cookies'] = $_COOKIE; // Forward the raw cookies (used as auth when the request comes ID)
+        } else {
+            throw new \Error("No authentication method found");
+        }
+
+        // Send the request to the socket service that will notify the user
+        self::post('/1/socket/2fa', $request);
+    }
+
     public function lookupUser($id)
     {
         $res = $this->get('/1/identity/users/'.$id);
