@@ -301,19 +301,21 @@ trait Resource
         $class = static::getClass();
         $validator = Validator::make($request->all(), ["*" => [Rule::relation($class)]]);
         $validator->validate();
-        $items = $request->all();
-        foreach ($items as $key => $id) {
-            $items[$key] = static::findOrFail($id);
+        $items = [];
+        foreach ($request->get('remove') ?? [] as $key) {
+            $items[$key] = static::findOrFail($key);
             if (app(Gate::class)->getPolicyFor($class)) {
                 $this->authorize('delete', $items[$key]);
             }
         }
-        DB::transaction(function () use ($class, $request) {
+        DB::transaction(function () use ($class, $request, $items) {
             foreach ($items as $item) {
                 $item->delete();
             }
         });
-        return response()->true();
+        return response()->json([
+            'removed' => $items,
+        ]);
     }
 
     /**
@@ -345,7 +347,7 @@ trait Resource
         }
         $this->validate($request, $rules);
         $creates = [];
-        foreach ($request->get('create') as $row) {
+        foreach ($request->get('create') ?? [] as $row) {
             $validated = collect($row)->only(array_keys($createRules))->all();
             $validated = static::fillDefaultValues($validated, false, $createRules);
             $item = (new $class())->fill($validated);
@@ -356,15 +358,15 @@ trait Resource
         }
 
         $updates = [];
-        foreach ($request->get('update') as $row) {
-            $item = static::findOrFail($row[$keyName]);
+        foreach ($request->get('update') ?? [] as $key => $row) {
+            $item = static::findOrFail($key);
             $validated = collect($row)->only(array_keys($updateRules))->except($keyName)->all();
             $validated = static::fillDefaultValues($validated, $item, $updateRules);
             $item->fill($validated);
             if (app(Gate::class)->getPolicyFor($class)) {
                 $this->authorize('update', $item);
             }
-            $updates[$item->$keyName] = $item;
+            $updates[$key] = $item;
         }
 
         $return = collect([]);

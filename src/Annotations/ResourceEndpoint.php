@@ -23,7 +23,7 @@ class ResourceEndpoint extends BaseEndpoint
     ];
     protected $customPaths = [
         "batch" => "batch",
-        "batchDestroy" => "batchDestroy",
+        "batchDestroy" => "batch",
         "partialUpdate" => null,
     ];
 
