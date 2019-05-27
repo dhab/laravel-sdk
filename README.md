@@ -34,10 +34,10 @@ Run the following command to copy the views in to your `resources/views/vendor` 
 php artisan vendor:publish --provider="DreamHack\SDK\Providers\SocialiteServiceProvider"
 ```
 
-## Getting started with DHResource
+# Getting started with DHResource
 DHResource is our way to automagically create CRUD-endpoints that suits our admin interface.
 
-### Controller setup
+## Controller setup
 Make sure annotations is set up correctly and then but this phpdoc above the controller class:
 
 This is the most basic version:
@@ -53,7 +53,7 @@ This is the most basic version:
  */
 ```
 
-# You can can also add these options to @DHResource and @Super:
+### You can can also add these options to @DHResource and @Super:
 
  * only
 
