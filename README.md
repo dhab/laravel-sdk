@@ -38,6 +38,16 @@ php artisan vendor:publish --provider="DreamHack\SDK\Providers\SocialiteServiceP
 DHResource is our way to automagically create CRUD-endpoints that suits our admin interface.
 
 ## Controller setup
+
+### Namespaces
+The following namespaces needs to be "imported" in the controller.
+
+```php
+use DreamHack\SDK\Http\Resource;
+use App\Models\Foo;
+```
+
+### Annotations
 Make sure annotations is set up correctly and then but this phpdoc above the controller class:
 
 This is the most basic version:
@@ -52,6 +62,9 @@ This is the most basic version:
  * @Super
  */
 ```
+
+@Super indicates that "all" methods will require super user privileges.
+The alternative is @SkipAuth, but that's not really useful for admin CRUD :)
 
 ### You can can also add these options to @DHResource and @Super:
 
@@ -70,6 +83,19 @@ This is the most basic version:
    ```php
    @Super(except={"publicGet"})
    ```
+
+### Mandatory functions in controller
+A DHResource controller usually starts out like this:
+
+```php
+class FooController extends Controller
+{
+    use Resource;
+    protected static function getClass()
+    {
+        return Foo::class;
+    }
+```
 
 ### Abstract model methods in Resource trait
 
