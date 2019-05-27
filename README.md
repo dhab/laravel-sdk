@@ -33,3 +33,146 @@ Run the following command to copy the views in to your `resources/views/vendor` 
 ```bash
 php artisan vendor:publish --provider="DreamHack\SDK\Providers\SocialiteServiceProvider"
 ```
+
+# Getting started with DHResource
+DHResource is our way to automagically create CRUD-endpoints that suits our admin interface.
+
+## Controller setup
+
+### Namespaces
+The following namespaces needs to be "imported" in the controller.
+
+```php
+use DreamHack\SDK\Http\Resource;
+use App\Models\Foo;
+```
+
+### Annotations
+Make sure annotations is set up correctly and then but this phpdoc above the controller class:
+
+This is the most basic version:
+
+```php
+/**
+ * @DHResource(
+    "foopath",
+    version="1"
+    as="foomodel"
+   )
+ * @Super
+ */
+```
+
+@Super indicates that "all" methods will require super user privileges.
+The alternative is @SkipAuth, but that's not really useful for admin CRUD :)
+
+### You can can also add these options to @DHResource and @Super:
+
+ * only
+
+   If you need to override a certain method, you can configure what methods you need like:
+
+   ```php
+   @DHResource(only={"index", "store", "show", "update", "destroy"})
+   ```
+
+ * except
+
+   If some resources don't need to be for super users only
+
+   ```php
+   @Super(except={"publicGet"})
+   ```
+
+### Mandatory functions in controller
+A DHResource controller usually starts out like this:
+
+```php
+class FooController extends Controller
+{
+    use Resource;
+    protected static function getClass()
+    {
+        return Foo::class;
+    }
+```
+
+### Overrideable functions in controller
+
+ * index
+
+   List a resource (GET /1/service/foo)
+
+ * show
+
+   Show a specific item (GET /1/service/foo/<id>)
+
+ * store
+
+   Create a new item (POST /1/service/foo)
+
+ * update
+
+   Update a an item. Expects the entire object. (PUT /1/service/foo/<id>)
+
+ * partialUpdate
+
+   Same as above, but requires only changed values. (POST /1/service/foo/<id>)
+
+ * destroy
+
+   Delete an item (DELETE /1/service/foo/<id>)
+
+ * batchDestroy
+
+   Delete a group of items (POST /1/service/foo/batch, with json like this)
+
+   ```json
+   {
+     "remove": [
+       "id1",
+       "id2"
+     ]
+   }
+   ```
+
+ * batch
+
+   Partially update several items. (PUT /1/service/foo/batch, with json like this)
+
+   ```json
+   {
+     "id1": {
+       "keyToChange": 1,
+     },
+     "id2": {
+       "keyToChangeForId2": "foo",
+     }
+   }
+   ```
+
+### Abstract model methods in Resource trait
+
+ * getDefaultRelations()
+
+   return a list of relations to send to `$model->with()` / `->load()`
+
+ * getSyncRelations()
+
+   return a list of relations to send to `$model->sync()`
+
+ * getResponseClass()
+
+   if the response needs to be special, return the name of a class that implements `DreamHack\SDK\Http\Responses\ModelResponse`
+
+ * getRequiredFields()
+
+   list of fields that are mandatory
+
+ * getFieldValidators()
+
+   return validators for each field in the model
+
+ * getEventsAffected()
+
+   return a list of event-IDs to clear proxy cache for, usually just runs the same function in the connected event.
