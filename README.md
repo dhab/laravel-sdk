@@ -55,9 +55,9 @@ This is the most basic version:
 ```php
 /**
  * @DHResource(
-    "<path/to/base>",
+    "foopath",
     version="1"
-    as="<modelname>"
+    as="foomodel"
    )
  * @Super
  */
@@ -96,6 +96,60 @@ class FooController extends Controller
         return Foo::class;
     }
 ```
+
+### Overrideable functions in controller
+
+ * index
+
+ List a resource (GET /1/service/foo)
+ 
+ * show
+
+ Show a specific item (GET /1/service/foo/<id>)
+
+ * store
+
+ Create a new item (POST /1/service/foo)
+
+ * update
+
+ Update a an item. Expects the entire object. (PUT /1/service/foo/<id>)
+
+ * partialUpdate
+
+ Same as above, but requires only changed values. (POST /1/service/foo/<id>)
+
+ * destroy
+
+ Delete an item (DELETE /1/service/foo/<id>)
+
+ * batchDestroy
+
+ Delete a group of items (POST /1/service/foo/batch, with json like this)
+
+ ```json
+ {
+   "remove": [
+     "id1",
+     "id2"
+   ]
+ }
+ ```
+
+ * batch
+
+ Partially update several items. (PUT /1/service/foo/batch, with json like this)
+
+ ```json
+ {
+   "id1": {
+     "keyToChange": 1,
+   },
+   "id2": {
+     "keyToChangeForId2": "foo",
+   }
+ }
+ ```
 
 ### Abstract model methods in Resource trait
 
