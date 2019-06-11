@@ -354,7 +354,7 @@ trait Resource
             if (app(Gate::class)->getPolicyFor($class)) {
                 $this->authorize('create', $item);
             }
-            $creates[] = $item;
+            $creates[] = ["item" => $item, "request" => $row];
         }
 
         $updates = [];
@@ -366,20 +366,40 @@ trait Resource
             if (app(Gate::class)->getPolicyFor($class)) {
                 $this->authorize('update', $item);
             }
-            $updates[$key] = $item;
+            $updates[$key] = ["item" => $item, "request" => $row];
         }
 
         $return = collect([]);
         DB::transaction(function () use ($creates, $updates, $return, $keyName) {
-            foreach ($creates as $item) {
+            foreach ($creates as $data) {
+                $item = $data['item'];
+                $row = $data['request'];
                 if (!$item->save()) {
                     throw new Exception("Couldn't create model.");
                 }
+                foreach (static::getSyncRelations() as $relation => $key) {
+                    $item->$relation()->sync(
+                        collect($row[$relation] ?? [])
+                            ->map(function ($item) use ($key) {
+                                return $item[$key] ?? $item;
+                            })
+                    );
+                }
                 $return->push($item);
             }
-            foreach ($updates as $item) {
+            foreach ($updates as $data) {
+                $item = $data['item'];
+                $row = $data['request'];
                 if (!$item->save()) {
                     throw new Exception("Couldn't update model #".($item->$keyName).".");
+                }
+                foreach (static::getSyncRelations() as $relation => $key) {
+                    $item->$relation()->sync(
+                        collect($row[$relation] ?? [])
+                            ->map(function ($item) use ($key) {
+                                return $item[$key] ?? $item;
+                            })
+                    );
                 }
                 $return->push($item);
             }
