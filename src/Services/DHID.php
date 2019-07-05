@@ -12,6 +12,18 @@ class DHID extends Client
     private $updates = [];
 
     /**
+     * Keep the users JWT token and do a request
+     **/
+    public function requestAsUser($method, $url, Array $params = []) {
+        $params['auth'] = null; // Override default config for DHID singleton
+        $params['headers'] = [
+            'Authorization' => $this->getTokenFromRequest(request()), // Otherwise basic auth will be used
+        ];
+
+        return parent::request($method, $url, $params);
+    }
+
+    /**
      * Queue an update for a specific route
      */
     public function updateRoute($route, $args = [])
@@ -64,12 +76,12 @@ class DHID extends Client
     // on ID (especially login/logout) it might be in a posted/getted parameter.
     private function getTokenFromRequest($request)
     {
-        return $request->input('token') ?? $request->bearerToken();
+        return $request->input('token') ?? 'Bearer '.$request->bearerToken();
     }
 
     private function sendNotificationToSocket($to, $json, $token = null)
     {
-        if (!$token) {
+        if ($token === null) {
             $token = $this->getTokenFromRequest(request());
         }
         
@@ -118,7 +130,7 @@ class DHID extends Client
         ], $token);
     }
 
-    public function notifyChannel(string $channel, string $type, $data = null, array $options = [], $token = null)
+    public function notifyChannel(string $channel, string $type, $data = null, array $options = [], $token = false)
     {
         return $this->sendNotificationToSocket("channel", [
             'options' => $options,
