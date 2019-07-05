@@ -14,7 +14,8 @@ class DHID extends Client
     /**
      * Keep the users JWT token and do a request
      **/
-    public function requestAsUser($method, $url, Array $params = []) {
+    public function requestAsUser($method, $url, Array $params = [])
+    {
         $params['auth'] = null; // Override default config for DHID singleton
         $params['headers'] = [
             'Authorization' => $this->getTokenFromRequest(request()), // Otherwise basic auth will be used
