@@ -8,9 +8,9 @@
         "source": "https://git.dreamhack.se/dhid/laravel-sdk"
     },
     "require": {
-        "illuminate/database": "5.7.*",
+        "illuminate/database": "5.8.*",
         "ramsey/uuid": "^3.3",
-        "laravelcollective/annotations": "5.7.*",
+        "laravelcollective/annotations": "5.8.*",
         "guzzlehttp/guzzle": "^6.2",
         "symfony/yaml": "^3.2.8",
         "fzaninotto/faker": "^1.6",
