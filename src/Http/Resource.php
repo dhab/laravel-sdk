@@ -262,7 +262,7 @@ trait Resource
             $item->$relation()->sync(
                 collect($request->input($relation))
                     ->map(function ($item) use ($key) {
-                        return $item[$key];
+                        return $item[$key] ?? $item;
                     })
             );
         }
