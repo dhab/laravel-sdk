@@ -134,7 +134,7 @@ class API extends Client
     /**
      * Award an achievement to a user, make sure API_CLIENT_ID and API_SECRET are set correctly
      */
-    public static function awardAchievement($achievement_id, $user_id)
+    public static function awardAchievement($achievement_id, $user_id, $event_id = null)
     {
         try {
             $res = DHID::request(
@@ -143,6 +143,7 @@ class API extends Client
                 [
                 "json" => [
                     "user_id" => $user_id,
+                    "event_id" => $event_id,
                 ],
                 ]
             );
