@@ -148,8 +148,10 @@ class API extends Client
                 ]
             );
         } catch (\Exception $e) {
-            // Ignore any error that might come up, but log it.
-            Log::error('Failed to send internal request', ["exception" => $e]);
+            // This is probably an error that the user already have an achievement or something similar
+            return false;
         }
+
+        return true;
     }
 }
