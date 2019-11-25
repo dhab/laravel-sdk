@@ -14,9 +14,9 @@ class UnauthorizedException extends Exception
      * @param  \Illuminate\Http\Response  $response
      * @return void
      */
-    public function __construct()
+    public function __construct($text = "Unauthorized")
     {
-        parent::__construct('Unauthorized');
+        parent::__construct($text);
     }
 
     public function getStatusCode()
