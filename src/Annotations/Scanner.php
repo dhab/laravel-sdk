@@ -48,10 +48,7 @@ class Scanner extends BaseRouteScanner
 
     public function getManifest($skipClass = false)
     {
-        $manifest = false;
-        if (!App::environment('local', 'staging') && Cache::has($this->cache_key)) {
-            $manifest = Cache::get($this->cache_key);
-        }
+        $manifest = Cache::get($this->cache_key, false);
         if (!$manifest) {
             $manifest = [
                 "uuid" => config('dhid.api_uuid'),
@@ -112,9 +109,8 @@ class Scanner extends BaseRouteScanner
             usort($manifest['endpoints'], function ($a, $b) {
                 return (strlen($a['url']) > strlen($b['url'])) ? -1 : 1;
             });
-            if (!App::environment('local', 'staging')) {
-                Cache::put($this->cache_key, $manifest, 5);
-            }
+
+            Cache::put($this->cache_key, $manifest, 300);
         }
         return $manifest;
     }
