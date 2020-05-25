@@ -9,7 +9,7 @@
     },
     "require": {
         "illuminate/database": "^6.0",
-        "ramsey/uuid": "^4.0",
+        "ramsey/uuid": "^3.7",
         "laravelcollective/annotations": "^6.0",
         "guzzlehttp/guzzle": "^6.5",
         "symfony/yaml": "^5.0",
