@@ -4,7 +4,8 @@ namespace DreamHack\SDK\Mail;
 
 use DreamHack\SDK\Facades\Guzzle;
 use Log;
-use Mandrill;
+use MailchimpTransactional\ApiClient;
+use MailchimpTransactional\ApiException;
 
 /*
  * READ THIS BEFORE USING!
@@ -86,7 +87,8 @@ class SendTemplate
     public function send()
     {
         try {
-            $mandrill = new Mandrill(config('mandrill.api_key'));
+            $mailchimp = new ApiClient();
+            $mailchimp->setApiKey(config('mandrill.api_key'));
 
             // To find out more about the format of the message-array check this one out:
             // https://mandrillapp.com/api/docs/messages.php.html
@@ -105,21 +107,19 @@ class SendTemplate
             $message['merge_language'] = 'handlebars';
 
             // Call mandrill API
-            $result = $mandrill->messages->sendTemplate(
-                $this->template,
-                $this->getVars(),
-                $message,
-                false, // async
-                'Main Pool' // IP-pool
-            );
+            $result = $mailchimp->messages->sendTemplate([
+                "template_name" => $this->template,
+                "template_content" => [$this->getVars()],
+                "message" => $message,
+            ]);
 
-            if ($result[0]['status'] !== 'sent') {
+            if ($result[0]->status !== 'sent') {
                 Log::error('Failed to send via mandrill', $result);
                 return false;
             }
 
             return true;
-        } catch (Mandrill_Error $e) {
+        } catch (ApiException $e) {
             Log::error('A mandrill error occurred', $e);
             return false;
         }
